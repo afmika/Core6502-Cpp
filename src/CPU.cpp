@@ -8,14 +8,7 @@
 
 CPU::Core6502::Core6502()
 {
-    PROG_COUNTER = 0x00; // the current addr
-    CLOCK = 0x00; // the current cycle count
-    CUR_VALUE = 0x00; // value fetched at the current addr
-
-    // basic registers
-    ACCUMULATOR = 0x00;
-    X = 0x00;
-    Y = 0x00;
+    this->Reset();
 
     // opcodes[addr] = name, instr, addrmode, n_clocks, n_bytes
     // ??? = illegal opcode
@@ -282,32 +275,49 @@ CPU::Core6502::~Core6502()
 
 }
 
+int CPU::Core6502::GetCurrentClock()
+{
+    return CLOCK;
+}
 
 void CPU::Core6502::DisplayStatus()
 {
     /*
+     * REGISTERS
+     */
+    const char * row = "+----+----+----+----------------+";
+    const char * str = "| AC | XR | YR |   STACK_PTR    |";
+    const char * vrow="+-------------------------------+";
+    printf("%s\n%s\n%s\n", row, str, row);
+    printf("| %02x | %02x | %02x |          %02x    |\n", ACCUMULATOR, X, Y, STACK_PTR);
+    printf("%s\n", vrow);
+
+    /*
+     * STATUS
      * 7   6   5   4   3   2   1   0
      * N | V |   | B | D | I | Z | C
      */
     uint8_t reg = GetStatusFlag();
     uint8_t k = 0;
-    const char * row = "+---+---+---+---+---+---+---+---+\n";
-    const char * str = "| N | V |   | B | D | I | Z | C |\n";
+    const char * row1 = "+---+---+---+---+---+---+---+---+";
+    const char * str1 = "| N | V |   | B | D | I | Z | C |\n";
 
-    printf("%s", row);
-    printf("%s", str);
-    printf("%s", row);
+    printf("%s", str1);
+    printf("%s\n", row1);
     printf("|");
     while ( k < 8 ) {
         printf(" %i |", (reg >> (7-k) ) & 1);
         k++;
     }
-    printf("\n%s", row);
-}
-
-void CPU::Core6502::DisplayRegisters()
-{
-    printf("A = %02x,   X = %02x,   Y = %02x\n", ACCUMULATOR, X, Y);
+    printf("\n%s", row1);
+    /*
+     * PROGRAM COUNTER
+     */
+    printf("\n", vrow);
+    printf("| PROG_COUNTER            %04x  |\n", PROG_COUNTER);
+    printf("%s\n", vrow);
+    printf("| CLOCK_LEFT              %04x  |\n", GetCurrentClock());
+    printf("%s\n", vrow);
 }
 
 void CPU::Core6502::DisplayDebugInfos()
@@ -334,41 +344,41 @@ std::string CPU::Core6502::StringifyAddressMode(uint16_t instr_addr)
 }
 
 
-void CPU::Core6502::Next() // CLOCK
+void CPU::Core6502::Next () // CLOCK
 {
     if ( CLOCK == 0 ) {
-        // the latest instruction is done
+        // occurs when the latest instruction is done
         // we can proceed to the next one
 
-        uint16_t addr = PROG_COUNTER++;
-        uint8_t instr_addr = read(addr);      // gets the instr loaded in the memory
-        CLOCK = opcodes[instr_addr].n_clocks; // gets the number of cycle we need
+        uint8_t instr_addr = read(PROG_COUNTER++);      // gets the instr loaded in the memory
+        // printf("%02x\n", instr_addr);
 
-        std::string name = opcodes[instr_addr].name;
+        CLOCK = opcodes[instr_addr].n_clocks;           // gets the number of cycle we need
 
-        // printf("- MEM_ADDR %i : VAL %i | Instr %s\n", addr, instr_addr, name.c_str());
 
         // adds an additionnal clock if needed.
-        uint8_t n_clock  = 0x00;
+        uint8_t n_clock  = 0x01;
+
+
+        n_clock &= (this->*opcodes[instr_addr].addrmode)(); // initializes some variables according to the addrmode
 
         if ( opcodes[instr_addr].addrmode != &MODE_IMP ) {
             // Not implied => need to read from the memory
             CUR_VALUE = read( ADDR_ABS );
         }
 
-        n_clock |= (this->*opcodes[instr_addr].addrmode)(); // initializes some variables according to the addrmode
-        n_clock |= (this->*opcodes[instr_addr].run)();      // runs the instruction
+        n_clock &= (this->*opcodes[instr_addr].run)();      // runs the instruction
 
         CLOCK += n_clock;
 
         // debug
         CUR_OPCODE = instr_addr;
-        CUR_INSTR  = name;
+        CUR_INSTR  = opcodes[instr_addr].name;
         CUR_MODE = StringifyAddressMode( instr_addr );
     }
 
     // well... we are just waiting till this becomes 0
-    // the addrmode will handle the prog_counter
+    // the addrmode/run will both handle the prog_counter
     // we don't need to increment the program_counter here
     // PROG_COUNTER++
     CLOCK--;
@@ -477,6 +487,26 @@ void CPU::Core6502::SetCarryFlag (bool value) // C
 void CPU::Core6502::Connect(BUS* bus)
 {
     this->bus = bus;
+}
+
+void CPU::Core6502::Reset()
+{
+    PROG_COUNTER = 0x00; // the current addr
+    CLOCK        = 0x00;  // the current cycle count
+    CUR_VALUE    = 0x00;  // value fetched at the current addr
+
+    // basic registers
+    ACCUMULATOR = 0x00;
+    X           = 0x00;
+    Y           = 0x00;
+
+    SetNegativeFlag    (0); // N
+    SetOverFlowFlag    (0); // V
+    SetBreakFlag       (0); // B
+    SetDecimalModeFlag (0); // D
+    SetIRQFlag         (0); // I
+    SetZeroFlag        (0); // Z
+    SetCarryFlag       (0); // C
 }
 
 
@@ -615,7 +645,7 @@ uint8_t CPU::Core6502::MODE_IND () // Indirect
     // [NOTE] we can remove this condition
     // The original 6502 had this little bug :
     // if the lobyte of ptr_addr is equal to FF
-    // then it will literally ignores the + 1
+    // then the +1 will be ignored
     // For example : $3EFF + 1 => $3E00 which is equal to $3EFF & $FF00
 
     // (ptr_addr & 0x00FF) == 0x00FF
@@ -845,7 +875,7 @@ uint8_t CPU::Core6502::ADC ()
     uint8_t last_result = sum & 0x00FF;
     SetZeroFlag (last_result == 0);      // if the last result is 0 it's true
 
-    SetNegativeFlag(sum & 0x0080 != 0 );    // 8-th digit is set
+    SetNegativeFlag(sum & 0x80);    // 8-th digit is set
 
     uint16_t V  = ~(a ^ op) & (a ^ sum);
     SetOverFlowFlag (V & 0x0080); // Just checking the MSB
@@ -995,6 +1025,9 @@ BRK  Force Break
 */
 uint8_t CPU::Core6502::BRK ()
 {
+    PROG_COUNTER += 2;
+    SetBreakFlag(1);
+    // SetIRQFlag(1);
 	return 0;
 }
 
@@ -1275,6 +1308,7 @@ LDA  Load Accumulator with Memory
 */
 uint8_t CPU::Core6502::LDA ()
 {
+    ACCUMULATOR = CUR_VALUE;
 	return 0;
 }
 
@@ -1292,6 +1326,7 @@ LDX  Load Index X with Memory
 */
 uint8_t CPU::Core6502::LDX ()
 {
+    X = CUR_VALUE;
 	return 0;
 }
 
@@ -1309,6 +1344,8 @@ LDY  Load Index Y with Memory
 */
 uint8_t CPU::Core6502::LDY ()
 {
+    Y = CUR_VALUE;
+    std::cout << "Y = " << ADDR_ABS << std::endl;
 	return 0;
 }
 

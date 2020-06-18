@@ -8,7 +8,7 @@ int main() {
     // loads a program inside the virtual RAM
     /*
     bus->MEMORY = {
-        // ADC #3
+        // LDA #$3
         {0x0000, 0xA9},
         {0x0001, 0x03},
         // LDA #$FF
@@ -17,19 +17,24 @@ int main() {
     };
     */
 
-    std::string prog = "69 03 A9 FF";
+    std::string prog = "A9 03 A2 02 A0 03 69 FF";
     bus->loadProgram(prog);
+
+    printf("Program Size %i bits | %i Chuncks", bus->memSize(), bus->memSize() / 8);
 
     CPU::Core6502 cpu;
     cpu.Connect( bus );
+    cpu.Reset();
 
     int c = 0;
     while ( c < 20 ) {
+        if ( cpu.GetCurrentClock() == 0 ) {
+            printf("\n");
+            cpu.DisplayDebugInfos();
+            cpu.DisplayStatus();
+        }
         cpu.Next();
-        cpu.DisplayDebugInfos();
-        cpu.DisplayRegisters();
-        cpu.DisplayStatus();
-        printf("\n");
+        // printf("Ticks %d", cpu.GetCurrentClock());
         c++;
     }
 

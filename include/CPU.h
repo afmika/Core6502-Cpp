@@ -34,6 +34,11 @@ namespace CPU {
             }
         }
 
+        size_t memSize()
+        {
+            return MEMORY.size() * 8;
+        }
+
         void checkRange(uint16_t addr)
         {
             if ( ! (addr >= r_min && addr <= r_max ) ) {
@@ -62,8 +67,8 @@ namespace CPU {
             virtual ~Core6502();
 
             // debugging
+            int GetCurrentClock();
             void DisplayStatus();
-            void DisplayRegisters();
             void DisplayDebugInfos();
             std::string StringifyAddressMode(uint16_t instr_addr);
 
@@ -102,6 +107,7 @@ namespace CPU {
              * @todo
              */
              void Connect(BUS * bus);
+             void Reset();
 
 
 
