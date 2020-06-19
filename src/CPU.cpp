@@ -901,7 +901,12 @@ AND  AND Memory with Accumulator
 */
 uint8_t CPU::Core6502::AND ()
 {
-	return 0;
+    uint8_t operand = CUR_VALUE;
+    ACCUMULATOR    &= operand;
+
+    SetZeroFlag    ( ACCUMULATOR == 0x00);
+    SetNegativeFlag( ACCUMULATOR &  0x80);
+	return 1;
 }
 
 /**
