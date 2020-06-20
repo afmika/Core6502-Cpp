@@ -22,7 +22,8 @@ namespace CPU {
             }
         }
 
-        void loadProgram(std::string prog) {
+        void loadProgram(std::string prog) 
+        {
             std::stringstream s;
             s << prog;
             uint16_t mem_index = 0x0000;
@@ -31,6 +32,19 @@ namespace CPU {
                 s >> token;
                 MEMORY[mem_index++] = (uint8_t) std::stoul(token, nullptr, 16);
             }
+        }
+
+        void DisplayMemory(uint16_t min, uint16_t max) 
+        {
+            printf("\n------------------------------");
+            for (uint16_t i = min, k = 0; i <= max; i++, k++) {
+                if ( k % 8 == 0) {
+                    k = 0;
+                    printf("\n");
+                }
+                printf("%02x ", read(i));
+            }
+            printf("\n------------------------------\n");
         }
 
         size_t memSize()
@@ -120,7 +134,6 @@ namespace CPU {
                 void (CPU::Core6502::*run)() = nullptr;
                 void (CPU::Core6502::*addrmode)() = nullptr;
                 uint8_t n_clocks;
-                uint8_t n_bytes; // just keeping this one as a suplementary information
             } Instr;
 
             /**

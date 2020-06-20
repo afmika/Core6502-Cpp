@@ -17,7 +17,7 @@ int main() {
     };
     */
 
-    std::string prog = "A9 C0 AA E8 69 C4 00";
+    std::string prog = "a2 03 a0 06 88 8c 15 00 ec 15 00 d0 f7";
     bus->loadProgram(prog);
 
     printf("Program Size %i bits | %i Chuncks", bus->memSize(), bus->memSize() / 8);
@@ -35,10 +35,10 @@ int main() {
             printf("\n----------BRK, reset------\n");
             cpu.Reset();
         }
-
+        cpu.Next();
         cpu.DisplayDebugInfos();
         cpu.DisplayStatus();
-        cpu.Next();
+        bus->DisplayMemory(0x0000, 0x0015);
 
         getchar();
         // printf("Ticks %d", cpu.GetCurrentClock());
