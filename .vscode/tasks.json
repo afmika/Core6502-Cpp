@@ -6,7 +6,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "start build.sh",
+            "command": "build.bat",
             "args": [
             ],
             "group": "build",

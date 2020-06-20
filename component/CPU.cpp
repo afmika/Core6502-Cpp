@@ -351,18 +351,16 @@ void CPU::Core6502::Next () // CLOCK
 
     // printf("%02x\n", instr_addr);
 
-    CLOCK += opcodes[instr_addr].n_clocks;           // gets the number of cycle we need
+    CLOCK += opcodes[instr_addr].n_clocks;          // gets the number of cycle we need
 
-
-    (this->*opcodes[instr_addr].addrmode) (); // initializes some variables according to the addrmode
+    (this->*opcodes[instr_addr].addrmode) ();       // initializes some variables according to the addrmode
 
     if ( opcodes[instr_addr].addrmode != &MODE_IMP ) {
         // Not implied => need to read from the memory
         OPERAND = read( OPERAND );
     }
 
-    (this->*opcodes[instr_addr].run) ();      // runs the instruction
-
+    (this->*opcodes[instr_addr].run) ();            // runs the instruction
 
     // debug
     CUR_INSTR  = opcodes[instr_addr].name;
@@ -488,7 +486,7 @@ void CPU::Core6502::Reset()
     PROG_COUNTER = 0x00;  // the current addr
     CLOCK        = 0x00;  // the current cycle count
     OPERAND      = 0x00;  // value fetched
-    OPERAND     = 0x00;  // address fetched
+    OPERAND      = 0x00;  // address fetched
     ADDR_REL     = 0x00;  // relative address fetched
 
     // debug variables
@@ -650,7 +648,7 @@ void CPU::Core6502::MODE_IND () // Indirect
     // (ptr_addr & 0x00FF) == 0x00FF
     HI = LL == 0x00FF ? read(ptr_addr & 0xFF00) : read(ptr_addr + 1);
 
-    // in our case operand is an address
+    // in our case operand is an address (2 bytes)
     OPERAND          = ( HI << 8 ) | LO;
 }
 
@@ -734,8 +732,8 @@ void CPU::Core6502::MODE_INY () // indirect, Y-indexed
     uint16_t LL = read( ptr_adr );
     uint16_t HH = read( ptr_adr + 1 );
 
-    OPERAND    = ( HH << 8 ) | LL;
-    OPERAND   += Y;
+    OPERAND     = ( HH << 8 ) | LL;
+    OPERAND    += Y;
 
     // again if we encounter a new page
     if ( (OPERAND >> 8) != HH ) CLOCK++;
@@ -783,9 +781,13 @@ void CPU::Core6502::MODE_REL () // Relative
     // the effective address range
     // for the target instruction must be with -126 to +129 bytes of the branch.
 
-    OPERAND = read(PROG_COUNTER++);
-    // if the 8-th bit is set (= signed value)
-    // if ( OPERAND & 0x0080 ) OPERAND |= 0xFF00;
+    // [NOTE] : we need to store the result inside ADDR_REL
+    // and not OPERAND
+    ADDR_REL = read(PROG_COUNTER++);
+
+    // out of range
+    // ex : -126 => 1
+    if ( ADDR_REL & 0x0080 ) ADDR_REL |= 0xFF00;
 }
 
 /**
@@ -803,8 +805,7 @@ void CPU::Core6502::MODE_ZRO () // Zeropage
     */
 
     OPERAND = read( PROG_COUNTER++ ); // reading the value of the next address
-    OPERAND &= 0x00FF; // example $0023 & $00FF = $23 , that's just what ZRO is about
-
+    OPERAND &= 0x00FF;                // ex $0023 & $00FF = $23 , that's just what ZRO is about
 }
 
 /**
@@ -815,7 +816,6 @@ void CPU::Core6502::MODE_ZRX () // Zeropage X
     // same thing as above but the value of the X register will servve as an offset
     OPERAND = read(PROG_COUNTER++) + X;
     OPERAND &= 0x00FF;
-
 }
 
 /**
@@ -823,10 +823,9 @@ void CPU::Core6502::MODE_ZRX () // Zeropage X
  */
 void CPU::Core6502::MODE_ZRY () // Zeropage Y
 {
-    // same thing as above but the value of the Y register will servve as an offset
+    // same thing as above but the value of the Y register will serve as an offset instead
     OPERAND = read(PROG_COUNTER++) + Y;
     OPERAND &= 0x00FF;
-
 }
 
 void CPU::Core6502::NONE () // Illegal
@@ -875,27 +874,26 @@ ADC  Add Memory to Accumulator with Carry
 */
 void CPU::Core6502::ADC ()
 {
-    uint8_t operand = OPERAND;
-
+    // This instruction adds the contents of a memory location to the accumulator together with the carry bit. 
+    // If overflow occurs the carry bit is set, this enables multiple byte addition to be performed.
     uint16_t a      = ACCUMULATOR;
-    uint16_t op     = operand;
+    uint16_t op     = OPERAND;
     uint16_t c      = GetCarryFlag();
 
     // A + MSB + C
     uint16_t sum = a + op + c;
 
-    SetCarryFlag (sum  > 0x00FF);         // ex FF + 1 => 00 (1 carry)
+    SetCarryFlag (sum  > 0x00FF);    // ex FF + 1 => 00 (1 carry)
 
     uint8_t last_result = sum;
-    SetZeroFlag (last_result == 0);      // if the last result is 0 it's true
+    SetZeroFlag (last_result == 0);  // if the last result is 0 it's true
 
-    SetNegativeFlag(sum & 0x80);    // 8-th digit is set
+    SetNegativeFlag(sum & 0x80);     // 8-th digit is set
 
     uint16_t V  = ~(a ^ op) & (a ^ sum);
-    SetOverFlowFlag (V & 0x0080); // Just checking the MSB
+    SetOverFlowFlag (V & 0x0080);    // Just checking the MSB
 
-    ACCUMULATOR = sum; // the 8-bits part only matters
-
+    ACCUMULATOR = sum;               // the 8-bits part only matters
 }
 
 /**
@@ -915,12 +913,11 @@ AND  AND Memory with Accumulator
 */
 void CPU::Core6502::AND ()
 {
-    uint8_t operand = OPERAND;
-    ACCUMULATOR    &= operand;
+    // A logical AND is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.
+    ACCUMULATOR    &= (uint8_t) OPERAND;
 
     SetZeroFlag    ( ACCUMULATOR == 0x00);
     SetNegativeFlag( ACCUMULATOR &  0x80);
-
 }
 
 /**
@@ -937,22 +934,21 @@ ASL  Shift Left One Bit (Memory or Accumulator)
 */
 void CPU::Core6502::ASL ()
 {
-    std::cout << "C : " << OPERAND << std::endl;
+    // This operation shifts all the bits of the accumulator or memory contents one bit left. 
+    // Bit 0 is set to 0 and bit 7 is placed in the carry flag. 
+    // The effect of this operation is to multiply the memory contents by 2 (ignoring 2's complement considerations), 
+    // setting the carry if the result will not fit in 8 bits.
 
-    uint16_t operand = OPERAND;
-             operand = operand << 1;
-
-    SetNegativeFlag( operand &  0x80);
-    std::cout << "S : " << operand << std::endl;
-    SetZeroFlag    ( operand == 0x00);
-    SetCarryFlag   ( operand >  0xFF );
+    uint16_t res = OPERAND << 1;
+    SetNegativeFlag( res &  0x80);
+    SetZeroFlag    ( res & 0x00FF == 0x00);
+    SetCarryFlag   ( res & 0xFF00 > 0xFF );
 
 	if (opcodes[CUR_OPCODE].addrmode == &MODE_IMP) {
-        ACCUMULATOR = operand;
+        ACCUMULATOR = res;   // if OPERAND == ACC
 	} else {
-		write(OPERAND, operand);
+		write(OPERAND, res); //  if OPERAND == memory address
 	}
-
 }
 
 /**
@@ -965,13 +961,14 @@ BCC  Branch on Carry Clear
 */
 void CPU::Core6502::BCC ()
 {
+    // If the carry flag is clear then add the relative displacement 
+    // to the program counter to cause a branch to a new location.
     if ( !GetCarryFlag() ) {
 		CLOCK++;
 		OPERAND = PROG_COUNTER + ADDR_REL;
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
 	}
-
 }
 
 /**
@@ -991,7 +988,6 @@ void CPU::Core6502::BCS ()
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
 	}
-
 }
 
 /**
@@ -1010,7 +1006,6 @@ void CPU::Core6502::BEQ ()
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
 	}
-
 }
 
 /**
@@ -1026,11 +1021,14 @@ BIT  Test Bits in Memory with Accumulator
 */
 void CPU::Core6502::BIT ()
 {
-	uint16_t operand = ACCUMULATOR & OPERAND;
-	SetZeroFlag     ((operand & 0x00FF) == 0x00);
+    // This instructions is used to test if one or more bits are set in a target memory location. 
+    // The mask pattern in A is ANDed with the value in memory to set or clear the zero flag, 
+    // but the result is not kept. 
+    // Bits 7 and 6 of the value from memory are copied into the N and V flags.
+	OPERAND &= ACCUMULATOR;
+	SetZeroFlag     ((OPERAND & 0x00FF) == 0x00);
 	SetNegativeFlag (OPERAND & (1 << 7));
 	SetOverFlowFlag (OPERAND & (1 << 6));
-
 }
 
 /**
@@ -1049,7 +1047,6 @@ void CPU::Core6502::BMI ()
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
     }
-
 }
 
 /**
@@ -1068,7 +1065,6 @@ void CPU::Core6502::BNE ()
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
 	}
-
 }
 
 /**
@@ -1087,7 +1083,6 @@ void CPU::Core6502::BPL ()
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
 	}
-
 }
 
 /**
@@ -1100,23 +1095,32 @@ BRK  Force Break
 */
 void CPU::Core6502::BRK ()
 {
+    // The BRK instruction forces the generation of an interrupt request. 
+    // 1- The program counter and processor status are pushed on the stack 
+    // 2- then the IRQ interrupt vector at $FFFE/F is loaded into the PC 
+    // 3- and the break flag in the status set to one.
+    // [NOTE] : the stackptr range is [0100 - 01FF]
+
+    // the program counter is pushed on the stack
 	PROG_COUNTER++;
-
-	SetIRQFlag(1);
-	write(0x0100 + STACK_PTR, (PROG_COUNTER >> 8) & 0x00FF);
-	STACK_PTR--;
-	write(0x0100 + STACK_PTR, PROG_COUNTER & 0x00FF);
-	STACK_PTR--;
-
-	SetBreakFlag(1);
+    uint8_t pc_HH = PROG_COUNTER >> 8;
+    uint8_t pc_LL = PROG_COUNTER & 0x00FF;
+	write(0x0100 + STACK_PTR, pc_HH );
+	STACK_PTR--; // push -> stack--
+    write(0x0100 + STACK_PTR, pc_LL);
+	STACK_PTR--; // push -> stack--
+    
+    // The processor status is pushed on the stack
 	write(0x0100 + STACK_PTR, GetStatusFlag() );
-    // DisplayStatus();
+    STACK_PTR--; // push -> stack--
 
-	STACK_PTR--;
-	SetBreakFlag(0);
+    // The IRQ interrupt vector at $FFFE/F is loaded into the PC
+    uint16_t HH = read(0xFFFF) << 8;
+    uint16_t LL = read(0xFFFE);
+	PROG_COUNTER = HH | LL;
 
-	PROG_COUNTER = (uint16_t)read(0xFFFE) | ((uint16_t)read(0xFFFF) << 8);
-
+    // the BRQ flag is set to one
+	SetBreakFlag(1);
 }
 
 /**
@@ -1135,7 +1139,6 @@ void CPU::Core6502::BVC ()
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
 	}
-
 }
 
 /**
@@ -1154,7 +1157,6 @@ void CPU::Core6502::BVS ()
 		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
 		PROG_COUNTER = OPERAND;
 	}
-
 }
 
 /**
@@ -1168,7 +1170,6 @@ CLC  Clear Carry Flag
 void CPU::Core6502::CLC ()
 {
     SetCarryFlag(0);
-
 }
 
 /**
@@ -1182,7 +1183,6 @@ CLD  Clear Decimal Mode
 void CPU::Core6502::CLD ()
 {
     SetDecimalModeFlag(0);
-
 }
 
 /**
@@ -1196,7 +1196,6 @@ CLI  Clear Interrupt Disable Bit
 void CPU::Core6502::CLI ()
 {
     SetIRQFlag(0);
-
 }
 
 /**
@@ -1210,7 +1209,6 @@ CLV  Clear Overflow Flag
 void CPU::Core6502::CLV ()
 {
     SetOverFlowFlag(0);
-
 }
 
 /**
@@ -1230,13 +1228,15 @@ CMP  Compare Memory with Accumulator
 */
 void CPU::Core6502::CMP ()
 {
-	uint16_t operand = (uint16_t) ACCUMULATOR - (uint16_t) OPERAND;
+    // Z,C,N = A-M
+    // This instruction compares the contents of the accumulator with another memory held value 
+    // and sets the zero and carry flags as appropriate.
+
+	OPERAND = (uint16_t) ACCUMULATOR - OPERAND;
 
 	SetCarryFlag   (ACCUMULATOR >= OPERAND);
-	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
-	SetNegativeFlag( operand & 0x0080);
-
-
+	SetZeroFlag    ((OPERAND & 0x00FF) == 0x0000);
+	SetNegativeFlag( OPERAND & (1 << 7));
 }
 
 /**
@@ -1251,13 +1251,11 @@ CPX  Compare Memory and Index X
 */
 void CPU::Core6502::CPX ()
 {
-	uint16_t operand = (uint16_t) X - (uint16_t) OPERAND;
+	OPERAND = (uint16_t) X - OPERAND;
 
 	SetCarryFlag   (X >= OPERAND);
-	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
-	SetNegativeFlag(operand & 0x0080);
-
-
+	SetZeroFlag    ((OPERAND & 0x00FF) == 0x0000);
+	SetNegativeFlag( OPERAND & (1 << 7));
 }
 
 /**
@@ -1272,13 +1270,11 @@ CPY  Compare Memory and Index Y
 */
 void CPU::Core6502::CPY ()
 {
-	uint16_t operand = (uint16_t) Y - (uint16_t) OPERAND;
+	OPERAND = (uint16_t) Y - OPERAND;
 
 	SetCarryFlag   (Y >= OPERAND);
-	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
-	SetNegativeFlag( operand & 0x0080);
-
-
+	SetZeroFlag    ((OPERAND & 0x00FF) == 0x0000);
+	SetNegativeFlag( OPERAND & (1 << 7));
 }
 
 /**
@@ -1294,12 +1290,16 @@ DEC  Decrement Memory by One
 */
 void CPU::Core6502::DEC ()
 {
-	uint16_t operand = OPERAND - 1;
-	write(OPERAND, operand & 0x00FF);
+    // Subtracts one from the value held at a specified memory location 
+    // setting the zero and negative flags as appropriate.
 
-	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
-	SetNegativeFlag(operand & 0x0080);
+    // operand is an address here
+    // M, Z, N = M - 1
+	uint16_t res = OPERAND - 1;
+	write(OPERAND, res & 0x00FF);
 
+	SetZeroFlag    ((res & 0x00FF) == 0x0000);
+	SetNegativeFlag( res & (1 << 7) );
 }
 
 /**
@@ -1312,7 +1312,11 @@ DEX  Decrement Index X by One
 */
 void CPU::Core6502::DEX ()
 {
-
+    // X,Z,N = X-1
+    // Subtracts one from the X register setting the zero and negative flags as appropriate.
+    X--;
+	SetZeroFlag    ((X & 0x00FF) == 0x0000);
+	SetNegativeFlag( X & (1 << 7) );
 }
 
 /**
@@ -1325,7 +1329,11 @@ DEY  Decrement Index Y by One
 */
 void CPU::Core6502::DEY ()
 {
-
+    // X,Z,N = Y-1
+    // Subtracts one from the Y register setting the zero and negative flags as appropriate.
+    Y--;
+	SetZeroFlag    ((Y & 0x00FF) == 0x0000);
+	SetNegativeFlag( Y & (1 << 7) );
 }
 
 /**
@@ -1345,7 +1353,12 @@ EOR  Exclusive-OR Memory with Accumulator
 */
 void CPU::Core6502::EOR ()
 {
-
+    // A,Z,N = A^M
+    // An exclusive OR is performed, bit by bit, 
+    // on the accumulator contents using the contents of a byte of memory.
+    ACCUMULATOR ^= OPERAND;
+	SetZeroFlag    ((ACCUMULATOR & 0x00FF) == 0x0000);
+	SetNegativeFlag( ACCUMULATOR & (1 << 7) );  
 }
 
 /**

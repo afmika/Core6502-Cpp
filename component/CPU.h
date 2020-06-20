@@ -1,4 +1,3 @@
-#pragma once
 #include <bits/stdc++.h>
 
 /**
@@ -231,23 +230,23 @@ namespace CPU {
             uint16_t PROG_COUNTER = 0x0000; // 2 Bytes
 			uint8_t STACK_PTR     = 0x00;   // 1 Byte
 
-            uint8_t ACCUMULATOR = 0x00;
-            uint8_t X           = 0x00;
-            uint8_t Y           = 0x00;
+            uint8_t ACCUMULATOR   = 0x00;
+            uint8_t X             = 0x00;
+            uint8_t Y             = 0x00;
 
 
             /**
              * CLOCK CYCLES
              */
-            uint8_t  CLOCK     = 0x00;
+            uint8_t  CLOCK    = 0x00;
 
             // helpers
             uint16_t  OPERAND = 0x0000; // stores a temporary value (8-bits or 16-bits)
             uint16_t ADDR_REL = 0x0000; // stores a temporary address for relative instr
 
             // debugging
-            uint8_t CUR_OPCODE = 0x00;
-            std::string CUR_MODE = "";
+            uint8_t CUR_OPCODE    = 0x00;
+            std::string CUR_MODE  = "";
             std::string CUR_INSTR = "";
 
 

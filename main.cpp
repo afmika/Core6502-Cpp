@@ -17,7 +17,7 @@ int main() {
     };
     */
 
-    std::string prog = "0A 0A 0A 0A";
+    std::string prog = "A9 C0 AA E8 69 C4 00";
     bus->loadProgram(prog);
 
     printf("Program Size %i bits | %i Chuncks", bus->memSize(), bus->memSize() / 8);
@@ -26,18 +26,23 @@ int main() {
     cpu.Connect( bus );
     cpu.Reset();
 
-    int c = 0;
-    while ( c < 5 ) {
+    std::cout << (bool) 0x80 << std::endl;
+
+    while ( true ) {
         printf("\n");
+
+        if ( cpu.GetBreakFlag() ) {
+            printf("\n----------BRK, reset------\n");
+            cpu.Reset();
+        }
+
         cpu.DisplayDebugInfos();
         cpu.DisplayStatus();
         cpu.Next();
 
         getchar();
         // printf("Ticks %d", cpu.GetCurrentClock());
-        c++;
     }
-
     // printf("Total %i\n", cpu.GetStatusFlag());
     // cpu.Display_Status();
 
