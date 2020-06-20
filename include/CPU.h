@@ -93,6 +93,10 @@ namespace CPU {
              * Handles the CPU status flags
              * N | V |   | B | D | I | Z | C
              */
+            void SetDisableFlag (uint8_t pos);
+            void SetEnableFlag  (uint8_t pos);
+            void SetStatusFlag  (bool value, uint8_t pos);
+
             void SetNegativeFlag    (bool value); // N
             void SetOverFlowFlag    (bool value); // V
             void SetBreakFlag       (bool value); // B
@@ -114,8 +118,8 @@ namespace CPU {
             // Instructions
             typedef struct Instr {
                 std::string name;
-                uint8_t (CPU::Core6502::*run)() = nullptr;
-                uint8_t (CPU::Core6502::*addrmode)() = nullptr;
+                void (CPU::Core6502::*run)() = nullptr;
+                void (CPU::Core6502::*addrmode)() = nullptr;
                 uint8_t n_clocks;
                 uint8_t n_bytes; // just keeping this one as a suplementary information
             } Instr;
@@ -129,88 +133,88 @@ namespace CPU {
              * 6502's legal instructions
              * @todo
              */
-            uint8_t ADC(); // add with carry
-            uint8_t AND(); // and (with accumulator)
-            uint8_t ASL(); // arithmetic shift left
-            uint8_t BCC(); // branch on carry clear
-            uint8_t BCS(); // branch on carry set
-            uint8_t BEQ(); // branch on equal (zero set)
-            uint8_t BIT(); // bit test
-            uint8_t BMI(); // branch on minus (negative set)
-            uint8_t BNE(); // branch on not equal (zero clear)
-            uint8_t BPL(); // branch on plus (negative clear)
-            uint8_t BRK(); // break / interrupt
-            uint8_t BVC(); // branch on overflow clear
-            uint8_t BVS(); // branch on overflow set
-            uint8_t CLC(); // clear carry
-            uint8_t CLD(); // clear decimal
-            uint8_t CLI(); // clear interrupt disable
-            uint8_t CLV(); // clear overflow
-            uint8_t CMP(); // compare (with accumulator)
-            uint8_t CPX(); // compare with X
-            uint8_t CPY(); // compare with Y
-            uint8_t DEC(); // decrement
-            uint8_t DEX(); // decrement X
-            uint8_t DEY(); // decrement Y
-            uint8_t EOR(); // exclusive or (with accumulator)
-            uint8_t INC(); // increment
-            uint8_t INX(); // increment X
-            uint8_t INY(); // increment Y
-            uint8_t JMP(); // jump
-            uint8_t JSR(); // jump subroutine
-            uint8_t LDA(); // load accumulator
-            uint8_t LDX(); // load X
-            uint8_t LDY(); // load Y
-            uint8_t LSR(); // logical shift right
-            uint8_t NOP(); // no operation
-            uint8_t ORA(); // or with accumulator
-            uint8_t PHA(); // push accumulator
-            uint8_t PHP(); // push processor status (SR)
-            uint8_t PLA(); // pull accumulator
-            uint8_t PLP(); // pull processor status (SR)
-            uint8_t ROL(); // rotate left
-            uint8_t ROR(); // rotate right
-            uint8_t RTI(); // return from interrupt
-            uint8_t RTS(); // return from subroutine
-            uint8_t SBC(); // subtract with carry
-            uint8_t SEC(); // set carry
-            uint8_t SED(); // set decimal
-            uint8_t SEI(); // set interrupt disable
-            uint8_t STA(); // store accumulator
-            uint8_t STX(); // store X
-            uint8_t STY(); // store Y
-            uint8_t TAX(); // transfer accumulator to X
-            uint8_t TAY(); // transfer accumulator to Y
-            uint8_t TSX(); // transfer stack pointer to X
-            uint8_t TXA(); // transfer X to accumulator
-            uint8_t TXS(); // transfer X to stack pointer
-            uint8_t TYA(); // transfer Y to accumulator
+            void ADC(); // add with carry
+            void AND(); // and (with accumulator)
+            void ASL(); // arithmetic shift left
+            void BCC(); // branch on carry clear
+            void BCS(); // branch on carry set
+            void BEQ(); // branch on equal (zero set)
+            void BIT(); // bit test
+            void BMI(); // branch on minus (negative set)
+            void BNE(); // branch on not equal (zero clear)
+            void BPL(); // branch on plus (negative clear)
+            void BRK(); // break / interrupt
+            void BVC(); // branch on overflow clear
+            void BVS(); // branch on overflow set
+            void CLC(); // clear carry
+            void CLD(); // clear decimal
+            void CLI(); // clear interrupt disable
+            void CLV(); // clear overflow
+            void CMP(); // compare (with accumulator)
+            void CPX(); // compare with X
+            void CPY(); // compare with Y
+            void DEC(); // decrement
+            void DEX(); // decrement X
+            void DEY(); // decrement Y
+            void EOR(); // exclusive or (with accumulator)
+            void INC(); // increment
+            void INX(); // increment X
+            void INY(); // increment Y
+            void JMP(); // jump
+            void JSR(); // jump subroutine
+            void LDA(); // load accumulator
+            void LDX(); // load X
+            void LDY(); // load Y
+            void LSR(); // logical shift right
+            void NOP(); // no operation
+            void ORA(); // or with accumulator
+            void PHA(); // push accumulator
+            void PHP(); // push processor status (SR)
+            void PLA(); // pull accumulator
+            void PLP(); // pull processor status (SR)
+            void ROL(); // rotate left
+            void ROR(); // rotate right
+            void RTI(); // return from interrupt
+            void RTS(); // return from subroutine
+            void SBC(); // subtract with carry
+            void SEC(); // set carry
+            void SED(); // set decimal
+            void SEI(); // set interrupt disable
+            void STA(); // store accumulator
+            void STX(); // store X
+            void STY(); // store Y
+            void TAX(); // transfer accumulator to X
+            void TAY(); // transfer accumulator to Y
+            void TSX(); // transfer stack pointer to X
+            void TXA(); // transfer X to accumulator
+            void TXS(); // transfer X to stack pointer
+            void TYA(); // transfer Y to accumulator
 
             /**
              * Handles the addressing mode of all instructions
              * @todo
              */
 
-            uint8_t MODE_ACC (); // Accumulator
+            void MODE_ACC (); // Accumulator
 
-            uint8_t MODE_ABS (); // Absolute
-            uint8_t MODE_ABX (); // Absolute X-indexed
-            uint8_t MODE_ABY (); // Absolute Y-indexed
+            void MODE_ABS (); // Absolute
+            void MODE_ABX (); // Absolute X-indexed
+            void MODE_ABY (); // Absolute Y-indexed
 
-            uint8_t MODE_IMM (); // Immediate
-            uint8_t MODE_IMP (); // Implied
+            void MODE_IMM (); // Immediate
+            void MODE_IMP (); // Implied
 
-            uint8_t MODE_IND (); // Indirect
-            uint8_t MODE_INX (); // X-Indexed, indirect
-            uint8_t MODE_INY (); // indirect, Y-indexed
+            void MODE_IND (); // Indirect
+            void MODE_INX (); // X-Indexed, indirect
+            void MODE_INY (); // indirect, Y-indexed
 
-            uint8_t MODE_REL (); // Relative
+            void MODE_REL (); // Relative
 
-            uint8_t MODE_ZRO (); // Zeropage
-            uint8_t MODE_ZRX (); // Zeropage X
-            uint8_t MODE_ZRY (); // Zeropage Y
+            void MODE_ZRO (); // Zeropage
+            void MODE_ZRX (); // Zeropage X
+            void MODE_ZRY (); // Zeropage Y
 
-            uint8_t NONE     (); // Illegal
+            void NONE     (); // Illegal
 
             /**
              * Handles the CPU clock (1 clock => need to point at another addr)
@@ -262,12 +266,6 @@ namespace CPU {
              * In fact they are all 1 bit each
              * (They can be contained inside a 8 bits number)
              */
-            bool NEG_FLAG = false;
-            bool V_FLAG   = false;
-            bool BRK_FLAG = false;
-            bool D_FLAG   = false;
-            bool IRQ_FLAG = false;
-            bool Z_FLAG   = false;
-            bool C_FLAG   = false;
+            uint8_t STATUS_FLAG = (1 << 5);
     };
 };

@@ -17,7 +17,7 @@ int main() {
     };
     */
 
-    std::string prog = "A9 03 A2 02 A0 03 69 FF";
+    std::string prog = "0A 0A 0A 0A";
     bus->loadProgram(prog);
 
     printf("Program Size %i bits | %i Chuncks", bus->memSize(), bus->memSize() / 8);
@@ -28,11 +28,9 @@ int main() {
 
     int c = 0;
     while ( c < 20 ) {
-        if ( cpu.GetCurrentClock() == 0 ) {
-            printf("\n");
-            cpu.DisplayDebugInfos();
-            cpu.DisplayStatus();
-        }
+        printf("\n");
+        cpu.DisplayDebugInfos();
+        cpu.DisplayStatus();
         cpu.Next();
         // printf("Ticks %d", cpu.GetCurrentClock());
         c++;

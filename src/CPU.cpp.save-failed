@@ -346,27 +346,39 @@ std::string CPU::Core6502::StringifyAddressMode(uint16_t instr_addr)
 
 void CPU::Core6502::Next () // CLOCK
 {
-    uint8_t instr_addr = read(PROG_COUNTER++);      // gets the instr loaded in the memory
-    CUR_OPCODE = instr_addr;
+    if ( CLOCK == 0 ) {
+        // occurs when the latest instruction is done
+        // we can proceed to the next one
 
-    // printf("%02x\n", instr_addr);
+        uint8_t instr_addr = read(PROG_COUNTER++);      // gets the instr loaded in the memory
+        CUR_OPCODE = instr_addr;
 
-    CLOCK += opcodes[instr_addr].n_clocks;           // gets the number of cycle we need
+        // printf("%02x\n", instr_addr);
+
+        CLOCK = opcodes[instr_addr].n_clocks;           // gets the number of cycle we need
 
 
-    (this->*opcodes[instr_addr].addrmode) (); // initializes some variables according to the addrmode
+        (this->*opcodes[instr_addr].addrmode)(); // initializes some variables according to the addrmode
 
-    if ( opcodes[instr_addr].addrmode != &MODE_IMP ) {
-        // Not implied => need to read from the memory
-        CUR_VALUE = read( ADDR_ABS );
+        if ( opcodes[instr_addr].addrmode != &MODE_IMP ) {
+            // Not implied => need to read from the memory
+            CUR_VALUE = read( ADDR_ABS );
+        }
+        std::cout << "CUR VALUE " << (int) CUR_VALUE << std::endl;
+
+        (this->*opcodes[instr_addr].run)();      // runs the instruction
+
+
+        // debug
+        CUR_INSTR  = opcodes[instr_addr].name;
+        CUR_MODE = StringifyAddressMode( instr_addr );
     }
 
-    (this->*opcodes[instr_addr].run) ();      // runs the instruction
-
-
-    // debug
-    CUR_INSTR  = opcodes[instr_addr].name;
-    CUR_MODE   = StringifyAddressMode( instr_addr );
+    // well... we are just waiting till this becomes 0
+    // the addrmode/run will both handle the prog_counter
+    // we don't need to increment the program_counter here
+    // PROG_COUNTER++
+    CLOCK--;
 }
 
 /**
@@ -560,9 +572,7 @@ void CPU::Core6502::MODE_ABX () // Absolute X-indexed
     // For our example the difference between $00FF and $0100 resides on the hibyte
     // we just need to check if the hibyte changed or not
     // (uint8_t) ( (ADDR_ABS & 0xFF00) != (HH >> 8) );
-
-
-	// (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
+	return (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
 }
 
 /**
@@ -586,7 +596,7 @@ void CPU::Core6502::MODE_ABY () // Absolute Y-indexed
     // For our example the difference between $00FF and $0100 resides on the hibyte
     // we just need to check if the hibyte changed or not
     // (uint8_t) ( (ADDR_ABS & 0xFF00) != (HH >> 8) );
-	// (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
+	return (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
 }
 
 /**
@@ -687,6 +697,7 @@ void CPU::Core6502::MODE_INX () // X-Indexed, indirect
     uint16_t HH        = read( ptr_adr + 1 );
 
     ADDR_ABS           = (HH << 8) | LL;
+    return 0;
 }
 
 /**
@@ -727,7 +738,7 @@ void CPU::Core6502::MODE_INY () // indirect, Y-indexed
     ADDR_ABS   += Y;
 
     // again if we encounter a new page
-	// return (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
+	return (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
 }
 
 /**
@@ -810,6 +821,7 @@ void CPU::Core6502::MODE_ZRY () // Zeropage Y
 
 void CPU::Core6502::NONE () // Illegal
 {
+    return 0;
 }
 
 
