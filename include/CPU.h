@@ -242,9 +242,8 @@ namespace CPU {
             uint8_t  CLOCK     = 0x00;
 
             // helpers
-            uint8_t  CUR_VALUE = 0x00;   // stores a temporary value
-            uint16_t ADDR_ABS  = 0x0000; // stores a temporary address for abs instr
-            uint16_t ADDR_REL  = 0x0000; // stores a temporary address for relative instr
+            uint16_t  OPERAND = 0x0000; // stores a temporary value (8-bits or 16-bits)
+            uint16_t ADDR_REL = 0x0000; // stores a temporary address for relative instr
 
             // debugging
             uint8_t CUR_OPCODE = 0x00;

@@ -346,39 +346,27 @@ std::string CPU::Core6502::StringifyAddressMode(uint16_t instr_addr)
 
 void CPU::Core6502::Next () // CLOCK
 {
-    if ( CLOCK == 0 ) {
-        // occurs when the latest instruction is done
-        // we can proceed to the next one
+    uint8_t instr_addr = read(PROG_COUNTER++);      // gets the instr loaded in the memory
+    CUR_OPCODE = instr_addr;
 
-        uint8_t instr_addr = read(PROG_COUNTER++);      // gets the instr loaded in the memory
-        CUR_OPCODE = instr_addr;
+    // printf("%02x\n", instr_addr);
 
-        // printf("%02x\n", instr_addr);
-
-        CLOCK = opcodes[instr_addr].n_clocks;           // gets the number of cycle we need
+    CLOCK += opcodes[instr_addr].n_clocks;           // gets the number of cycle we need
 
 
-        (this->*opcodes[instr_addr].addrmode)(); // initializes some variables according to the addrmode
+    (this->*opcodes[instr_addr].addrmode) (); // initializes some variables according to the addrmode
 
-        if ( opcodes[instr_addr].addrmode != &MODE_IMP ) {
-            // Not implied => need to read from the memory
-            CUR_VALUE = read( ADDR_ABS );
-        }
-        std::cout << "CUR VALUE " << (int) CUR_VALUE << std::endl;
-
-        (this->*opcodes[instr_addr].run)();      // runs the instruction
-
-
-        // debug
-        CUR_INSTR  = opcodes[instr_addr].name;
-        CUR_MODE = StringifyAddressMode( instr_addr );
+    if ( opcodes[instr_addr].addrmode != &MODE_IMP ) {
+        // Not implied => need to read from the memory
+        OPERAND = read( OPERAND );
     }
 
-    // well... we are just waiting till this becomes 0
-    // the addrmode/run will both handle the prog_counter
-    // we don't need to increment the program_counter here
-    // PROG_COUNTER++
-    CLOCK--;
+    (this->*opcodes[instr_addr].run) ();      // runs the instruction
+
+
+    // debug
+    CUR_INSTR  = opcodes[instr_addr].name;
+    CUR_MODE   = StringifyAddressMode( instr_addr );
 }
 
 /**
@@ -444,6 +432,7 @@ void CPU::Core6502::SetDisableFlag(uint8_t pos)
         STATUS_FLAG ^= (1 << pos);
     }
 }
+
 void CPU::Core6502::SetStatusFlag(bool value, uint8_t pos)
 {
     if ( value ) SetEnableFlag (pos);
@@ -498,8 +487,8 @@ void CPU::Core6502::Reset()
 {
     PROG_COUNTER = 0x00;  // the current addr
     CLOCK        = 0x00;  // the current cycle count
-    CUR_VALUE    = 0x00;  // value fetched
-    ADDR_ABS     = 0x00;  // address fetched
+    OPERAND      = 0x00;  // value fetched
+    OPERAND     = 0x00;  // address fetched
     ADDR_REL     = 0x00;  // relative address fetched
 
     // debug variables
@@ -510,6 +499,7 @@ void CPU::Core6502::Reset()
     ACCUMULATOR = 0x00;
     X           = 0x00;
     Y           = 0x00;
+    STACK_PTR   = 0xff;
 
     STATUS_FLAG = (1 << 5);
 }
@@ -525,8 +515,7 @@ void CPU::Core6502::Reset()
 void CPU::Core6502::MODE_ACC () // Accumulator
 {
     //  In this mode the instruction operates on data in the accumulator, so no operands are needed.
-	ADDR_ABS = ACCUMULATOR;
-
+	OPERAND = ACCUMULATOR;
 }
 
 /**
@@ -546,9 +535,8 @@ void CPU::Core6502::MODE_ABS () // Absolute
     uint16_t LL = read(PROG_COUNTER++); // loads LL in the memory : 32
     uint16_t HH = read(PROG_COUNTER++); // loads HH in the memory : 3E
 
-    // for our example we have ADDR_ABS = 3E00 | 0032 which finally gives us 3E32
-    ADDR_ABS = ( HH << 8 ) | LL;
-
+    // for our example we have OPERAND = 3E00 | 0032 which finally gives us 3E32
+    OPERAND = ( HH << 8 ) | LL;
 }
 
 /**
@@ -565,14 +553,15 @@ void CPU::Core6502::MODE_ABX () // Absolute X-indexed
     // ex : $3E32 :: $HHLL
     uint16_t LL = read(PROG_COUNTER++);  // loads LL in the memory : 32
     uint16_t HH = read(PROG_COUNTER++);  // loads HH in the memory : 3E
-    ADDR_ABS = (( HH << 8 ) | LL) + X; // we are just using X as an offset
+    OPERAND = (( HH << 8 ) | LL) + X; // we are just using X as an offset
 
     // we need to add 1 more clock cycle if the page boundinary is crossed
     // for example $00FF + (X = 1) => $0100 (we need an additionnal cycle)
     // For our example the difference between $00FF and $0100 resides on the hibyte
     // we just need to check if the hibyte changed or not
-    // (uint8_t) ( (ADDR_ABS & 0xFF00) != (HH >> 8) );
-	return (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
+    // (uint8_t) ( (OPERAND & 0xFF00) != (HH >> 8) );
+
+    if ( (OPERAND >> 8) != HH ) CLOCK++;
 }
 
 /**
@@ -589,14 +578,15 @@ void CPU::Core6502::MODE_ABY () // Absolute Y-indexed
     // ex : $3E32 :: $HHLL
     uint16_t LL = read(PROG_COUNTER++);  // loads LL in the memory : 32
     uint16_t HH = read(PROG_COUNTER++);  // loads HH in the memory : 3E
-    ADDR_ABS = (( HH << 8 ) | LL) + Y; // we are just using Y as an offset
+    OPERAND = (( HH << 8 ) | LL) + Y; // we are just using Y as an offset
 
     // we need to add 1 more clock cycle if the page boundinary is crossed
     // for example $00FF + (Y = 1) => $0100 (we need an additionnal cycle)
     // For our example the difference between $00FF and $0100 resides on the hibyte
     // we just need to check if the hibyte changed or not
-    // (uint8_t) ( (ADDR_ABS & 0xFF00) != (HH >> 8) );
-	return (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
+    // (uint8_t) ( (OPERAND & 0xFF00) != (HH >> 8) );
+
+	if ((OPERAND >> 8) != HH) CLOCK++;
 }
 
 /**
@@ -610,8 +600,7 @@ void CPU::Core6502::MODE_IMM () // Immediate
     * accumulator.
     */
     // we dont need the ram since the value given is already what we are going to use
-    ADDR_ABS = PROG_COUNTER++;
-
+    OPERAND = PROG_COUNTER++;
 }
 
 /**
@@ -619,9 +608,10 @@ void CPU::Core6502::MODE_IMM () // Immediate
  */
 void CPU::Core6502::MODE_IMP () // Implied
 {
-    //  No operand addresses are required for this mode. They are implied by the instruction.
-    CUR_VALUE = ACCUMULATOR;
-
+    // No operand addresses are required for this mode. They are implied by the instruction.
+    // OPERAND = ACCUMULATOR;
+    // or OPERAND = Y;
+    // or OPERAND = X;
 }
 
 /**
@@ -634,9 +624,13 @@ void CPU::Core6502::MODE_IND () // Indirect
      * following).
      * Fetch the value stored at that address.
      */
+
     // This mode applies only to the JMP instruction - JuMP to new location. It is
     // indicated by parenthesis around the operand. The operand is the address of
     // the bytes whose value is the new location.
+
+    // Ex : MEM [ 00F1 : 01, 00F1 : CC]
+    // then JMP ($00F1) is equivalent to JMP $CC01
 
     // loads the two next bytes of instruction
     uint16_t LL       = read(PROG_COUNTER++);    // loads LL in the memory
@@ -656,8 +650,8 @@ void CPU::Core6502::MODE_IND () // Indirect
     // (ptr_addr & 0x00FF) == 0x00FF
     HI = LL == 0x00FF ? read(ptr_addr & 0xFF00) : read(ptr_addr + 1);
 
-    ADDR_ABS          = ( HI << 8 ) | LO;
-
+    // in our case operand is an address
+    OPERAND          = ( HI << 8 ) | LO;
 }
 
 /**
@@ -690,14 +684,16 @@ void CPU::Core6502::MODE_INX () // X-Indexed, indirect
     *
     */
 
-    uint16_t temp_addr = read(PROG_COUNTER++);
+    // Basically, we take the zero page address,
+    // add the value of the X register to it,
+    // then use that to look up a two-byte address
+    uint16_t temp_addr = read(PROG_COUNTER++); // no HHLL this time, we are using the zero page
 
     uint16_t ptr_adr   = temp_addr + X;
     uint16_t LL        = read( ptr_adr );
     uint16_t HH        = read( ptr_adr + 1 );
 
-    ADDR_ABS           = (HH << 8) | LL;
-    return 0;
+    OPERAND            = (HH << 8) | LL;
 }
 
 /**
@@ -729,16 +725,20 @@ void CPU::Core6502::MODE_INY () // indirect, Y-indexed
     *
     */
 
+    // Basically, we take the zero page address,
+    // the zero page address is dereferenced,
+    // then use that to look up a two-byte address
+    // and the Y register is added to the resulting address
     uint8_t ptr_adr = read(PROG_COUNTER++);
 
     uint16_t LL = read( ptr_adr );
     uint16_t HH = read( ptr_adr + 1 );
 
-    ADDR_ABS    = ( HH << 8 ) | LL;
-    ADDR_ABS   += Y;
+    OPERAND    = ( HH << 8 ) | LL;
+    OPERAND   += Y;
 
     // again if we encounter a new page
-	return (uint8_t) ((ADDR_ABS >> 8) != HH); // returns 1 if it's true
+    if ( (OPERAND >> 8) != HH ) CLOCK++;
 }
 
 /**
@@ -772,10 +772,20 @@ void CPU::Core6502::MODE_REL () // Relative
     *       c) If you find you need to branch further than 127 bytes, use the
     * opposite branch-on-condition and a JMP.
     */
-    ADDR_REL = read(PROG_COUNTER++);
-    // if the 8-th bit is set (= signed value)
-    if ( ADDR_REL & 0x0080 ) ADDR_REL |= 0xFF00;
+    // Relative addressing is used for branching instructions.
+    // These instructions take a single byte,
+    // which is used as an offset from the following instruction.
 
+    // Relative addressing mode is used by branch instructions (e.g. BEQ, BNE, etc.)
+    // which contain a signed 8 bit relative offset (e.g. -128 to +127)
+    // which is added to program counter if the condition is true.
+    // As the program counter itself is incremented during instruction execution by two
+    // the effective address range
+    // for the target instruction must be with -126 to +129 bytes of the branch.
+
+    OPERAND = read(PROG_COUNTER++);
+    // if the 8-th bit is set (= signed value)
+    // if ( OPERAND & 0x0080 ) OPERAND |= 0xFF00;
 }
 
 /**
@@ -792,8 +802,8 @@ void CPU::Core6502::MODE_ZRO () // Zeropage
     *   LDA $23     -- the zero page address
     */
 
-    ADDR_ABS = read( PROG_COUNTER++ ); // reading the value of the next address
-    ADDR_ABS &= 0x00FF; // example $0023 & $00FF = $23 , that's just what ZRO is about
+    OPERAND = read( PROG_COUNTER++ ); // reading the value of the next address
+    OPERAND &= 0x00FF; // example $0023 & $00FF = $23 , that's just what ZRO is about
 
 }
 
@@ -803,8 +813,8 @@ void CPU::Core6502::MODE_ZRO () // Zeropage
 void CPU::Core6502::MODE_ZRX () // Zeropage X
 {
     // same thing as above but the value of the X register will servve as an offset
-    ADDR_ABS = read(PROG_COUNTER++) + X;
-    ADDR_ABS &= 0x00FF;
+    OPERAND = read(PROG_COUNTER++) + X;
+    OPERAND &= 0x00FF;
 
 }
 
@@ -814,14 +824,13 @@ void CPU::Core6502::MODE_ZRX () // Zeropage X
 void CPU::Core6502::MODE_ZRY () // Zeropage Y
 {
     // same thing as above but the value of the Y register will servve as an offset
-    ADDR_ABS = read(PROG_COUNTER++) + Y;
-    ADDR_ABS &= 0x00FF;
+    OPERAND = read(PROG_COUNTER++) + Y;
+    OPERAND &= 0x00FF;
 
 }
 
 void CPU::Core6502::NONE () // Illegal
 {
-    return 0;
 }
 
 
@@ -866,7 +875,7 @@ ADC  Add Memory to Accumulator with Carry
 */
 void CPU::Core6502::ADC ()
 {
-    uint8_t operand = CUR_VALUE;
+    uint8_t operand = OPERAND;
 
     uint16_t a      = ACCUMULATOR;
     uint16_t op     = operand;
@@ -906,7 +915,7 @@ AND  AND Memory with Accumulator
 */
 void CPU::Core6502::AND ()
 {
-    uint8_t operand = CUR_VALUE;
+    uint8_t operand = OPERAND;
     ACCUMULATOR    &= operand;
 
     SetZeroFlag    ( ACCUMULATOR == 0x00);
@@ -928,9 +937,9 @@ ASL  Shift Left One Bit (Memory or Accumulator)
 */
 void CPU::Core6502::ASL ()
 {
-    std::cout << "C : " << CUR_VALUE << std::endl;
+    std::cout << "C : " << OPERAND << std::endl;
 
-    uint16_t operand = CUR_VALUE;
+    uint16_t operand = OPERAND;
              operand = operand << 1;
 
     SetNegativeFlag( operand &  0x80);
@@ -941,7 +950,7 @@ void CPU::Core6502::ASL ()
 	if (opcodes[CUR_OPCODE].addrmode == &MODE_IMP) {
         ACCUMULATOR = operand;
 	} else {
-		write(ADDR_ABS, operand);
+		write(OPERAND, operand);
 	}
 
 }
@@ -958,9 +967,9 @@ void CPU::Core6502::BCC ()
 {
     if ( !GetCarryFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
 	}
 
 }
@@ -978,9 +987,9 @@ void CPU::Core6502::BCS ()
     // same as above
 	if ( GetCarryFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
 	}
 
 }
@@ -997,9 +1006,9 @@ void CPU::Core6502::BEQ ()
 {
     if ( GetZeroFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
 	}
 
 }
@@ -1017,10 +1026,10 @@ BIT  Test Bits in Memory with Accumulator
 */
 void CPU::Core6502::BIT ()
 {
-	uint16_t operand = ACCUMULATOR & CUR_VALUE;
+	uint16_t operand = ACCUMULATOR & OPERAND;
 	SetZeroFlag     ((operand & 0x00FF) == 0x00);
-	SetNegativeFlag (CUR_VALUE & (1 << 7));
-	SetOverFlowFlag (CUR_VALUE & (1 << 6));
+	SetNegativeFlag (OPERAND & (1 << 7));
+	SetOverFlowFlag (OPERAND & (1 << 6));
 
 }
 
@@ -1036,9 +1045,9 @@ void CPU::Core6502::BMI ()
 {
 	if ( GetNegativeFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
     }
 
 }
@@ -1055,9 +1064,9 @@ void CPU::Core6502::BNE ()
 {
 	if ( GetZeroFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
 	}
 
 }
@@ -1074,9 +1083,9 @@ void CPU::Core6502::BPL ()
 {
 	if ( !GetNegativeFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
 	}
 
 }
@@ -1122,9 +1131,9 @@ void CPU::Core6502::BVC ()
 {
 	if ( !GetOverFlowFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
 	}
 
 }
@@ -1141,9 +1150,9 @@ void CPU::Core6502::BVS ()
 {
 	if ( GetOverFlowFlag() ) {
 		CLOCK++;
-		ADDR_ABS = PROG_COUNTER + ADDR_REL;
-		if( (ADDR_ABS & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
-		PROG_COUNTER = ADDR_ABS;
+		OPERAND = PROG_COUNTER + ADDR_REL;
+		if( (OPERAND & 0xFF00) != (PROG_COUNTER & 0xFF00) ) CLOCK++;
+		PROG_COUNTER = OPERAND;
 	}
 
 }
@@ -1221,9 +1230,9 @@ CMP  Compare Memory with Accumulator
 */
 void CPU::Core6502::CMP ()
 {
-	uint16_t operand = (uint16_t) ACCUMULATOR - (uint16_t) CUR_VALUE;
+	uint16_t operand = (uint16_t) ACCUMULATOR - (uint16_t) OPERAND;
 
-	SetCarryFlag   (ACCUMULATOR >= CUR_VALUE);
+	SetCarryFlag   (ACCUMULATOR >= OPERAND);
 	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
 	SetNegativeFlag( operand & 0x0080);
 
@@ -1242,9 +1251,9 @@ CPX  Compare Memory and Index X
 */
 void CPU::Core6502::CPX ()
 {
-	uint16_t operand = (uint16_t) X - (uint16_t) CUR_VALUE;
+	uint16_t operand = (uint16_t) X - (uint16_t) OPERAND;
 
-	SetCarryFlag   (X >= CUR_VALUE);
+	SetCarryFlag   (X >= OPERAND);
 	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
 	SetNegativeFlag(operand & 0x0080);
 
@@ -1263,9 +1272,9 @@ CPY  Compare Memory and Index Y
 */
 void CPU::Core6502::CPY ()
 {
-	uint16_t operand = (uint16_t) Y - (uint16_t) CUR_VALUE;
+	uint16_t operand = (uint16_t) Y - (uint16_t) OPERAND;
 
-	SetCarryFlag   (Y >= CUR_VALUE);
+	SetCarryFlag   (Y >= OPERAND);
 	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
 	SetNegativeFlag( operand & 0x0080);
 
@@ -1285,8 +1294,8 @@ DEC  Decrement Memory by One
 */
 void CPU::Core6502::DEC ()
 {
-	uint16_t operand = CUR_VALUE - 1;
-	write(ADDR_ABS, operand & 0x00FF);
+	uint16_t operand = OPERAND - 1;
+	write(OPERAND, operand & 0x00FF);
 
 	SetZeroFlag    ((operand & 0x00FF) == 0x0000);
 	SetNegativeFlag(operand & 0x0080);
@@ -1426,7 +1435,7 @@ LDA  Load Accumulator with Memory
 */
 void CPU::Core6502::LDA ()
 {
-    ACCUMULATOR = CUR_VALUE;
+    ACCUMULATOR = OPERAND;
 
 }
 
@@ -1444,7 +1453,7 @@ LDX  Load Index X with Memory
 */
 void CPU::Core6502::LDX ()
 {
-    X = CUR_VALUE;
+    X = OPERAND;
 
 }
 
@@ -1462,8 +1471,8 @@ LDY  Load Index Y with Memory
 */
 void CPU::Core6502::LDY ()
 {
-    Y = CUR_VALUE;
-    std::cout << "Y = " << ADDR_ABS << std::endl;
+    Y = OPERAND;
+    std::cout << "Y = " << OPERAND << std::endl;
 
 }
 
@@ -1646,7 +1655,7 @@ SBC  Subtract Memory from Accumulator with Borrow
 */
 void CPU::Core6502::SBC ()
 {
-    uint16_t operand = CUR_VALUE;
+    uint16_t operand = OPERAND;
     uint16_t value = operand ^ 0x00FF;
 
     uint16_t a = ACCUMULATOR;

@@ -27,7 +27,7 @@ int main() {
     cpu.Reset();
 
     int c = 0;
-    while ( c < 20 ) {
+    while ( c < 5 ) {
         printf("\n");
         cpu.DisplayDebugInfos();
         cpu.DisplayStatus();
