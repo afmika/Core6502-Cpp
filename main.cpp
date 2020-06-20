@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "include/CPU.h"
+#include "component/CPU.h"
 
 int main() {
 
