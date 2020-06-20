@@ -32,6 +32,8 @@ int main() {
         cpu.DisplayDebugInfos();
         cpu.DisplayStatus();
         cpu.Next();
+
+        getchar();
         // printf("Ticks %d", cpu.GetCurrentClock());
         c++;
     }
