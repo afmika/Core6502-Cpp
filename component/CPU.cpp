@@ -1357,7 +1357,7 @@ void CPU::Core6502::EOR ()
     // An exclusive OR is performed, bit by bit, 
     // on the accumulator contents using the contents of a byte of memory.
     ACCUMULATOR ^= OPERAND;
-	SetZeroFlag    ((ACCUMULATOR & 0x00FF) == 0x0000);
+	SetZeroFlag    ( (ACCUMULATOR & 0x00FF) == 0x0000);
 	SetNegativeFlag( ACCUMULATOR & (1 << 7) );  
 }
 
