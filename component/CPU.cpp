@@ -323,7 +323,7 @@ void CPU::Core6502::DisplayStatus()
 void CPU::Core6502::DisplayDebugInfos()
 {
     printf("OPCODE %04x | %s [%s]\n", CUR_OPCODE, CUR_INSTR.c_str(), CUR_MODE.c_str());
-    if ( opcodes[CUR_OPCODE].addrmode != &MODE_IMP) {
+    if ( CURRENT_ADDRMODE != &MODE_IMP) {
         printf("=> %s $%04x (%s)\n", CUR_INSTR.c_str(), ARGUMENT, CUR_MODE.c_str());
     } else {
         printf("=> %s ---- (%s)\n", CUR_INSTR.c_str(), CUR_MODE.c_str());
@@ -361,11 +361,8 @@ void CPU::Core6502::Next () // CLOCK
     (this->*opcodes[instr_addr].addrmode) ();       // initializes some variables according to the addrmode
     
     // addr mode check
-    void (CPU::Core6502::*caddrmode)() = opcodes[instr_addr].addrmode;
-    bool absolute_addr =   caddrmode == &MODE_ABS
-                        || caddrmode == &MODE_ABY
-                        || caddrmode == &MODE_ABX;
-    if ( caddrmode != &MODE_IMP ) {
+    CURRENT_ADDRMODE = opcodes[instr_addr].addrmode;
+    if ( CURRENT_ADDRMODE != &MODE_IMP ) {
         // ARGUMENT contains the addr_abs
         BEF_READING = ARGUMENT; // there are cases where this is useful (ex: if the instr requires writting)
         ARGUMENT = read(ARGUMENT);
@@ -497,8 +494,8 @@ void CPU::Core6502::Reset()
 {
     PROG_COUNTER = 0x00;  // the current addr
     CLOCK        = 0x00;  // the current cycle count
-    ARGUMENT      = 0x00;  // value fetched
-    ARGUMENT      = 0x00;  // address fetched
+    ARGUMENT     = 0x00;  // value fetched
+    ARGUMENT     = 0x00;  // address fetched
     ADDR_REL     = 0x00;  // relative address fetched
 
     // debug variables
@@ -956,7 +953,7 @@ void CPU::Core6502::ASL ()
     SetZeroFlag    ( res & 0x00FF == 0x00);
     SetCarryFlag   ( res & 0xFF00 > 0xFF );
 
-	if (opcodes[CUR_OPCODE].addrmode == &MODE_IMP) {
+	if (CURRENT_ADDRMODE == &MODE_IMP) {
         ACCUMULATOR = res;   // if ARGUMENT == ACC
 	} else {
 		write(BEF_READING, res); //  if ARGUMENT == memory address
@@ -1115,16 +1112,13 @@ void CPU::Core6502::BRK ()
 
     // the program counter is pushed on the stack
 	PROG_COUNTER++;
-    uint8_t pc_HH = PROG_COUNTER >> 8;
-    uint8_t pc_LL = PROG_COUNTER & 0x00FF;
-	write(0x0100 + STACK_PTR, pc_HH );
-	STACK_PTR--; // push -> stack--
-    write(0x0100 + STACK_PTR, pc_LL);
-	STACK_PTR--; // push -> stack--
+    uint8_t pc_HH = (uint8_t) PROG_COUNTER >> 8;
+    uint8_t pc_LL = (uint8_t) PROG_COUNTER;
+	write(0x0100 + STACK_PTR--, pc_HH );
+    write(0x0100 + STACK_PTR--, pc_LL);
     
     // The processor status is pushed on the stack
-	write(0x0100 + STACK_PTR, GetStatusFlag() );
-    STACK_PTR--; // push -> stack--
+	write(0x0100 + STACK_PTR--, GetStatusFlag() );
 
     // The IRQ interrupt vector at $FFFE/F is loaded into the PC
     uint16_t HH = read(0xFFFF) << 8;
@@ -1386,7 +1380,13 @@ INC  Increment Memory by One
 */
 void CPU::Core6502::INC ()
 {
+    // M,Z,N = M+1
+    // INC - Increment Memory
+    ARGUMENT++;
+	SetZeroFlag    ( (ARGUMENT & 0x00FF) == 0x0000);
+	SetNegativeFlag( ARGUMENT & (1 << 7) );   
 
+    write(BEF_READING, ARGUMENT);
 }
 
 /**
@@ -1399,7 +1399,9 @@ INX  Increment Index X by One
 */
 void CPU::Core6502::INX ()
 {
-
+    X++;
+	SetZeroFlag    ((X & 0x00FF) == 0x0000);
+	SetNegativeFlag( X & (1 << 7) );  
 }
 
 /**
@@ -1412,7 +1414,9 @@ INY  Increment Index Y by One
 */
 void CPU::Core6502::INY ()
 {
-
+    Y++;
+	SetZeroFlag    ((Y & 0x00FF) == 0x0000);
+	SetNegativeFlag( Y & (1 << 7) );  
 }
 
 /**
@@ -1426,7 +1430,8 @@ JMP  Jump to New Location
 */
 void CPU::Core6502::JMP ()
 {
-
+    // Sets the program counter to the address specified by the operand.
+    PROG_COUNTER = BEF_READING;
 }
 
 /**
@@ -1440,7 +1445,18 @@ JSR  Jump to New Location Saving Return Address
 */
 void CPU::Core6502::JSR ()
 {
+    // The JSR instruction pushes the address (minus one) of the return point on to the stack 
+    // and then sets the program counter to the target memory address.
 
+	PROG_COUNTER--; // return point mem address
+    uint8_t pc_HH = (uint8_t) PROG_COUNTER >> 8;
+    uint8_t pc_LL = (uint8_t) PROG_COUNTER;
+
+	write(0x0100 + STACK_PTR--, pc_HH);
+
+	write(0x0100 + STACK_PTR--, pc_LL);
+
+	PROG_COUNTER = BEF_READING;
 }
 
 /**
@@ -1511,7 +1527,22 @@ LSR  Shift One Bit Right (Memory or Accumulator)
 */
 void CPU::Core6502::LSR ()
 {
+    // A,C,Z,N = A >> 1 or M,C,Z,N = M >> 1
+    // Each of the bits in A or M is shift one place to the right. 
+    // The bit that was in bit 0 is shifted into the carry flag.
+    // Bit 7 is set to zero.
 
+    // [Note] : if Mode acc then ARGUMENT will contain the value of the Accumulator
+    // Else it's an address
+	SetCarryFlag(ARGUMENT & 1); //  The bit that was in bit 0 is shifted into the carry flag.
+
+	ARGUMENT >>= 1;	
+	
+	SetZeroFlag    ( (ARGUMENT & 0x00FF) == 0x0000);
+	SetNegativeFlag(  ARGUMENT & (1 << 7) ); 
+
+    if ( CURRENT_ADDRMODE == &MODE_ACC ) ACCUMULATOR = ARGUMENT;
+    else                                 write(BEF_READING, ARGUMENT);
 }
 
 /**
@@ -1524,7 +1555,7 @@ NOP  No Operation
 */
 void CPU::Core6502::NOP ()
 {
-
+    if ( CUR_OPCODE == 0xfc ) CLOCK++;
 }
 
 /**
@@ -1544,7 +1575,12 @@ ORA  OR Memory with Accumulator
 */
 void CPU::Core6502::ORA ()
 {
-
+    // A,Z,N = A|M
+    // An inclusive OR is performed, bit by bit, on the accumulator contents 
+    // using the contents of a byte of memory.
+    ACCUMULATOR |= ARGUMENT;
+	SetZeroFlag    ( (ACCUMULATOR & 0x00FF) == 0x0000);
+	SetNegativeFlag(  ACCUMULATOR & (1 << 7) ); 
 }
 
 /**
@@ -1557,7 +1593,8 @@ PHA  Push Accumulator on Stack
 */
 void CPU::Core6502::PHA ()
 {
-
+    // Pushes a copy of the accumulator on to the stack.
+    write(0x0100 + STACK_PTR--, ACCUMULATOR);
 }
 
 /**
@@ -1570,7 +1607,10 @@ PHP  Push Processor Status on Stack
 */
 void CPU::Core6502::PHP ()
 {
-
+    // Pushes a copy of the status flags on to the stack.
+    // SetBreakFlag(1);
+    write(0x0100 + STACK_PTR--, GetStatusFlag ());
+    // SetBreakFlag(0);
 }
 
 /**
@@ -1583,7 +1623,11 @@ PLA  Pull Accumulator from Stack
 */
 void CPU::Core6502::PLA ()
 {
-
+    // Pulls an 8 bit value from the stack and into the accumulator. 
+    // The zero and negative flags are set as appropriate.    
+    ACCUMULATOR = read(++STACK_PTR + 0x0100);
+	SetZeroFlag    ( (ACCUMULATOR & 0x00FF) == 0x0000);
+	SetNegativeFlag(  ACCUMULATOR & (1 << 7) ); 
 }
 
 /**
@@ -1596,7 +1640,10 @@ PLP  Pull Processor Status from Stack
 */
 void CPU::Core6502::PLP ()
 {
-
+    // Pulls an 8 bit value from the stack and into the accumulator. 
+    // The zero and negative flags are set as appropriate.    
+    uint8_t new_state =  read(++STACK_PTR + 0x0100);
+    STATUS_FLAG = new_state;
 }
 
 /**
@@ -1613,7 +1660,17 @@ ROL  Rotate One Bit Left (Memory or Accumulator)
 */
 void CPU::Core6502::ROL ()
 {
+    // Move each of the bits in either A or M one place to the left. 
+    // Bit 0 is filled with the current value of the carry flag whilst 
+    // the old bit 7 becomes the new carry flag value.
+	uint16_t res = (ARGUMENT << 1) | GetCarryFlag();
 
+	SetCarryFlag   (res & 0xFF00);
+	SetZeroFlag    ((res & 0x00FF) == 0x0000);
+	SetNegativeFlag(res & 0x0080);
+
+	if (CURRENT_ADDRMODE == &MODE_IMP) ACCUMULATOR = res;
+	else                               write(BEF_READING, res);
 }
 
 /**
@@ -1630,7 +1687,18 @@ ROR  Rotate One Bit Right (Memory or Accumulator)
 */
 void CPU::Core6502::ROR ()
 {
+    // Move each of the bits in either A or M one place to the right. 
+    // Bit 7 is filled with the current value of the carry flag whilst 
+    // the old bit 0 becomes the new carry flag value.
+    uint16_t res = GetCarryFlag ();
+	         res = (res << 7) | (ARGUMENT >> 1);
 
+	SetCarryFlag   (ARGUMENT & 1); //  the old bit 0 becomes the new carry flag value.
+	SetZeroFlag    ((res & 0x00FF) == 0x0000);
+	SetNegativeFlag( res & 0x0080);
+
+	if (CURRENT_ADDRMODE == &MODE_IMP) ACCUMULATOR = res;
+	else                               write(BEF_READING, res);
 }
 
 /**
@@ -1703,7 +1771,7 @@ SEC  Set Carry Flag
 */
 void CPU::Core6502::SEC ()
 {
-
+    SetCarryFlag (1);
 }
 
 /**
@@ -1716,7 +1784,7 @@ SED  Set Decimal Flag
 */
 void CPU::Core6502::SED ()
 {
-
+    SetDecimalModeFlag (1);
 }
 
 /**
@@ -1729,7 +1797,7 @@ SEI  Set Interrupt Disable Status
 */
 void CPU::Core6502::SEI ()
 {
-
+    SetIRQFlag (1);
 }
 
 /**
@@ -1750,7 +1818,7 @@ void CPU::Core6502::STA ()
 {
     // M = A
     // Stores the contents of the accumulator into memory.
-    write(BEF_READING, ACCUMULATOR);
+    write (BEF_READING, ACCUMULATOR);
 }
 
 /**
@@ -1767,7 +1835,7 @@ void CPU::Core6502::STX ()
 {
     // M = X
     // Stores the contents of the X register into memory.
-    write(BEF_READING, X);
+    write (BEF_READING, X);
 }
 
 /**
@@ -1784,7 +1852,7 @@ void CPU::Core6502::STY ()
 {
     // M = Y
     // Stores the contents of the Y register into memory.
-    write(BEF_READING, Y);
+    write (BEF_READING, Y);
 }
 
 /**
@@ -1829,8 +1897,8 @@ void CPU::Core6502::TSX ()
     // Copies the current contents of the stack register into the X register 
     // and sets the zero and negative flags as appropriate.
     X = STACK_PTR;
-	SetZeroFlag    ( (X & 0x00FF) == 0x0000);
-	SetNegativeFlag(  X & (1 << 7) );  
+	SetZeroFlag     ( (X & 0x00FF) == 0x0000);
+	SetNegativeFlag (  X & (1 << 7) );  
 }
 
 /**
@@ -1846,8 +1914,8 @@ void CPU::Core6502::TXA ()
     // A = X
     // Copies the current contents of the X register into the accumulator and sets the zero and negative flags as appropriate.
     ACCUMULATOR = X;
-	SetZeroFlag    ( (ACCUMULATOR & 0x00FF) == 0x0000);
-	SetNegativeFlag(  ACCUMULATOR & (1 << 7) );  
+	SetZeroFlag     ( (ACCUMULATOR & 0x00FF) == 0x0000);
+	SetNegativeFlag (  ACCUMULATOR & (1 << 7) );  
 }
 
 /**
@@ -1888,6 +1956,6 @@ void CPU::Core6502::TYA ()
     // Copies the current contents of the Y register into the accumulator 
     // and sets the zero and negative flags as appropriate.
     ACCUMULATOR = Y;
-	SetZeroFlag    ( (ACCUMULATOR & 0x00FF) == 0x0000);
-	SetNegativeFlag(  ACCUMULATOR & (1 << 7) );  
+	SetZeroFlag     ( (ACCUMULATOR & 0x00FF) == 0x0000);
+	SetNegativeFlag (  ACCUMULATOR & (1 << 7) );  
 }

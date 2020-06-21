@@ -267,6 +267,7 @@ namespace CPU {
             uint16_t BEF_READING = 0x000 ; // stores a temporary address
             
             uint16_t ADDR_REL    = 0x0000; // stores a temporary address for relative instr
+            void (CPU::Core6502::*CURRENT_ADDRMODE)() = nullptr;
 
             // debugging
             uint8_t CUR_OPCODE    = 0x00;
