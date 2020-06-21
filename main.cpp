@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include "component/CPU.h"
 
-int main() {
+int main(int argc, const char * argv[]) {
 
     CPU::BUS* bus = new CPU::BUS(0x0000, 0xffff, false);
 
@@ -18,8 +18,22 @@ int main() {
     */
 
     //std::string prog = "a2 03 a0 06 88 8c 15 00 ec 15 00 d0 f7";
-    std::string prog = "A9 03 69 FF 08";
-    bus->loadProgram(prog);
+    std::string final_prog = "";
+    for (int  i = 1; i < argc; i++) {
+        using namespace std;
+        string temp( argv[i-1] );
+        final_prog.append(temp + (i == argc ? ""s: " "s));
+    }
+
+    std::string prog = "a9 01 c9 02 d0 02 85 22 00";
+    if ( argc == 1 ) {
+        printf("Loading default test program...\n");
+        final_prog = prog;
+    } else {
+        printf("Loading given program\n");
+    }
+
+    bus->loadProgram(final_prog);
 
     printf("Program Size %i bits | %i Chuncks", bus->memSize(), bus->memSize() / 8);
 
@@ -30,7 +44,7 @@ int main() {
     std::cout << (bool) 0x80 << std::endl;
 
 
-    // step by step
+    // step by 
     while ( true ) {
         printf("\n");
 

@@ -927,6 +927,7 @@ void CPU::Core6502::AND ()
 
     SetZeroFlag    ( ACCUMULATOR == 0x00);
     SetNegativeFlag( ACCUMULATOR &  0x80);
+    CLOCK++;
 }
 
 /**
@@ -1112,10 +1113,12 @@ void CPU::Core6502::BRK ()
 
     // the program counter is pushed on the stack
 	PROG_COUNTER++;
-    uint8_t pc_HH = (uint8_t) PROG_COUNTER >> 8;
     uint8_t pc_LL = (uint8_t) PROG_COUNTER;
+    uint8_t pc_HH = (uint8_t) PROG_COUNTER >> 8;
+
 	write(0x0100 + STACK_PTR--, pc_HH );
-    write(0x0100 + STACK_PTR--, pc_LL);
+    write(0x0100 + STACK_PTR--, pc_LL );
+    
     
     // The processor status is pushed on the stack
 	write(0x0100 + STACK_PTR--, GetStatusFlag() );
@@ -1243,6 +1246,8 @@ void CPU::Core6502::CMP ()
 	SetCarryFlag   (ACCUMULATOR >= ARGUMENT);
 	SetZeroFlag    ((ARGUMENT & 0x00FF) == 0x0000);
 	SetNegativeFlag( ARGUMENT & (1 << 7));
+
+    CLOCK++;
 }
 
 /**
@@ -1365,6 +1370,8 @@ void CPU::Core6502::EOR ()
     ACCUMULATOR ^= ARGUMENT;
 	SetZeroFlag    ( (ACCUMULATOR & 0x00FF) == 0x0000);
 	SetNegativeFlag( ACCUMULATOR & (1 << 7) );  
+
+    CLOCK++;
 }
 
 /**
@@ -1477,6 +1484,7 @@ LDA  Load Accumulator with Memory
 void CPU::Core6502::LDA ()
 {
     ACCUMULATOR = ARGUMENT;
+    CLOCK++;
 }
 
 /**
@@ -1494,6 +1502,7 @@ LDX  Load Index X with Memory
 void CPU::Core6502::LDX ()
 {
     X = ARGUMENT;
+    CLOCK++;
 }
 
 /**
@@ -1511,6 +1520,7 @@ LDY  Load Index Y with Memory
 void CPU::Core6502::LDY ()
 {
     Y = ARGUMENT;
+    CLOCK++;
 }
 
 /**
@@ -1581,6 +1591,7 @@ void CPU::Core6502::ORA ()
     ACCUMULATOR |= ARGUMENT;
 	SetZeroFlag    ( (ACCUMULATOR & 0x00FF) == 0x0000);
 	SetNegativeFlag(  ACCUMULATOR & (1 << 7) ); 
+    CLOCK++;
 }
 
 /**
@@ -1711,7 +1722,13 @@ RTI  Return from Interrupt
 */
 void CPU::Core6502::RTI ()
 {
+    // The RTI instruction is used at the end of an interrupt processing routine. 
+    // It pulls the processor flags from the stack followed by the program counter.
+    STATUS_FLAG  = read(++STACK_PTR + 0x0100);
 
+    uint16_t LL  = read(++STACK_PTR + 0x0100); 
+    uint16_t HH  = read(++STACK_PTR + 0x0100); 
+    PROG_COUNTER = (HH << 8) | LL;
 }
 
 /**
@@ -1724,7 +1741,11 @@ RTS  Return from Subroutine
 */
 void CPU::Core6502::RTS ()
 {
-
+    // The RTS instruction is used at the end of a subroutine to return to the calling routine. 
+    // It pulls the program counter (minus one) from the stack.
+    uint16_t LL = read(++STACK_PTR + 0x0100);
+    uint16_t HH = read(++STACK_PTR + 0x0100);
+    PROG_COUNTER = (HH << 8) | LL;
 }
 
 /**
@@ -1750,7 +1771,7 @@ void CPU::Core6502::SBC ()
     uint16_t a = ACCUMULATOR;
     uint16_t op = value;
     uint16_t c = GetCarryFlag();
-	// Notice this is exactly the same as addition from here!
+    
 	uint16_t sum = a + op + c;
 	SetCarryFlag    (sum & 0xFF00);
 	SetZeroFlag     ((sum & 0x00FF) == 0);
@@ -1759,6 +1780,7 @@ void CPU::Core6502::SBC ()
 
 	ACCUMULATOR = sum & 0x00FF;
 
+    CLOCK++;
 }
 
 /**
