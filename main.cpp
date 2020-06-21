@@ -25,7 +25,7 @@ int main(int argc, const char * argv[]) {
         final_prog.append(temp + (i == argc ? ""s: " "s));
     }
 
-    std::string prog = "a9 01 c9 02 d0 02 85 22 00";
+    std::string prog = "a2 02 a0 04 8e 24 00 6d 24 00 8d 25 00 88 d0 f7";
     if ( argc == 1 ) {
         printf("Loading default test program...\n");
         final_prog = prog;
@@ -45,35 +45,36 @@ int main(int argc, const char * argv[]) {
 
 
     // step by 
+    /*
     while ( true ) {
         printf("\n");
 
         if ( cpu.GetBreakFlag() ) {
-            printf("\n----------BRK, reset------\n");
+            printf("\n----------[---- STOP - BRK - EXECUTION DONE ----]------\n");
             cpu.Reset();
+            break;
+        } else {
+            cpu.Next();
+            cpu.DisplayDebugInfos();
+            cpu.DisplayStatus();
+            bus->DisplayMemory(0x0000, 0x00FF / 4);            
         }
-        cpu.Next();
-        cpu.DisplayDebugInfos();
-        cpu.DisplayStatus();
-        bus->DisplayMemory(0x0000, 0x00FF / 4);
 
         getchar();
         // printf("Ticks %d", cpu.GetCurrentClock());
     }
-
-    // continuous
-    /*
+    */
     while ( true ) {
         cpu.Next();
         if ( cpu.GetBreakFlag() ) {
             cpu.DisplayDebugInfos();
             cpu.DisplayStatus();
             bus->DisplayMemory(0x0000, 0x00FF / 4);
-            printf("\n----------BRK, reset------\n");
+            printf("\n----------[---- STOP - BRK - EXECUTION DONE ----]------\n");
             cpu.Reset();
             getchar();
+            return 0;
         }
     }
-    */
     return 0;
 }

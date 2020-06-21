@@ -140,6 +140,15 @@ namespace CPU {
                 void (CPU::Core6502::*run)() = nullptr;
                 void (CPU::Core6502::*addrmode)() = nullptr;
                 uint8_t n_clocks;
+                // aggregate initialization
+                Instr(
+                    std::string name,
+                    void (CPU::Core6502::*run)(),
+                    void (CPU::Core6502::*addrmode)(),
+                    uint8_t n_clocks  
+                ) : name(name), run(run), addrmode(addrmode), n_clocks(n_clocks) { }
+
+                Instr() : name(), run(), addrmode(), n_clocks() { }
             } Instr;
 
             /**
