@@ -36,15 +36,21 @@ namespace CPU {
 
         void DisplayMemory(uint16_t min, uint16_t max) 
         {
-            printf("\n------------------------------");
+            printf("\n-------------------------------------------------\n");
+            for (uint16_t i = min, k = 0; i < (min + 16); i++, k++) {
+                printf("%02x ", i);
+            }
+            printf("\n-------------------------------------------------");
+
             for (uint16_t i = min, k = 0; i <= max; i++, k++) {
-                if ( k % 8 == 0) {
+                if ( k % 16 == 0) {
                     k = 0;
+                    if ( k != 0 ) printf(" | %02x", (i / 8));
                     printf("\n");
                 }
                 printf("%02x ", read(i));
             }
-            printf("\n------------------------------\n");
+            printf("\n-------------------------------------------------\n");
         }
 
         size_t memSize()
@@ -254,8 +260,13 @@ namespace CPU {
             uint8_t  CLOCK    = 0x00;
 
             // helpers
-            uint16_t  OPERAND = 0x0000; // stores a temporary value (8-bits or 16-bits)
-            uint16_t ADDR_REL = 0x0000; // stores a temporary address for relative instr
+            uint16_t  ARGUMENT   = 0x0000; // stores a temporary value (8-bits or 16-bits)
+
+            // useful for instr that writes on the memory such as STA, STX, ... etc
+            // the current token is an absolute address where we need to write instead of reading
+            uint16_t BEF_READING = 0x000 ; // stores a temporary address
+            
+            uint16_t ADDR_REL    = 0x0000; // stores a temporary address for relative instr
 
             // debugging
             uint8_t CUR_OPCODE    = 0x00;

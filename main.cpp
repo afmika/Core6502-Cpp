@@ -17,7 +17,8 @@ int main() {
     };
     */
 
-    std::string prog = "a2 03 a0 06 88 8c 15 00 ec 15 00 d0 f7";
+    //std::string prog = "a2 03 a0 06 88 8c 15 00 ec 15 00 d0 f7";
+    std::string prog = "a9 80 85 01 65 01";
     bus->loadProgram(prog);
 
     printf("Program Size %i bits | %i Chuncks", bus->memSize(), bus->memSize() / 8);
