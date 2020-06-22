@@ -26,7 +26,7 @@ namespace CPU {
         {
             std::stringstream s;
             s << prog;
-            uint16_t mem_index = 0x0000;
+            uint16_t mem_index = r_min;
             while ( ! s.eof() ) {
                 std::string token;
                 s >> token;
@@ -36,11 +36,11 @@ namespace CPU {
 
         void DisplayMemory(uint16_t min, uint16_t max) 
         {
-            printf("\n-------------------------------------------------\n");
+            printf("\n");
             for (uint16_t i = min, k = 0; i < (min + 16); i++, k++) {
-                printf("%02x ", i);
+                printf("%04x ", i);
             }
-            printf("\n-------------------------------------------------");
+            printf("\n--------------------------------------------------------------------------------");
 
             for (uint16_t i = min, k = 0; i <= max; i++, k++) {
                 if ( k % 16 == 0) {
@@ -48,9 +48,15 @@ namespace CPU {
                     if ( k != 0 ) printf(" | %02x", (i / 8));
                     printf("\n");
                 }
-                printf("%02x ", read(i));
+                printf("  %02x ", read(i));
             }
-            printf("\n-------------------------------------------------\n");
+            printf("\n--------------------------------------------------------------------------------\n");
+        }
+
+        void DisplayStackMemory(uint8_t stack_value) {
+            // 0x0100 - 0x01FF
+            printf("\nSTACK MEMORY [idx = %02x] -------------------------------------------------------\n", stack_value);
+            DisplayMemory(0x0100 + stack_value, 0x01FF);
         }
 
         size_t memSize()
@@ -61,6 +67,7 @@ namespace CPU {
         void checkRange(uint16_t addr)
         {
             if ( ! (addr >= r_min && addr <= r_max ) ) {
+				printf("\n------- [ERROR] INVALID ADDRESS RANGE -------\n");
                 throw "INVALID ADDRESS RANGE!";
             }
         }
@@ -103,10 +110,12 @@ namespace CPU {
             bool GetCarryFlag       () const; // C
 
             uint8_t GetStatusFlag   () const; // = Sum[flag[i] * 2 ^ 7-i ]
+            uint8_t GetStackPtrvalue() const;
 
 
-            // Handles the CPU Instructions
-            void runInstructions(std::vector<uint16_t> instructions);
+
+            // Set the default pc
+            void DefineProgramCounter(uint16_t pc);
 
             /**
              * Handles the CPU status flags
@@ -127,7 +136,6 @@ namespace CPU {
 
             /**
              * Connects the CPU with an external component (ex : a RAM)
-             * @todo
              */
              void Connect(BUS * bus);
              void Reset();
@@ -158,7 +166,6 @@ namespace CPU {
 
             /**
              * 6502's legal instructions
-             * @todo
              */
             void ADC(); // add with carry
             void AND(); // and (with accumulator)
@@ -253,9 +260,11 @@ namespace CPU {
             /**
              * CPU REGISTERS
              */
-            // the program counter allows us to read to read the program inside
+            // the program counter allows us to read the program inside
             // our virtual memory
-            uint16_t PROG_COUNTER = 0x0000; // 2 Bytes
+            uint16_t DEFAULT_PROG_COUNTER = 0x0000; // 2 Bytes
+            uint16_t PROG_COUNTER         = 0x0000; // 2 Bytes
+			
 			uint8_t STACK_PTR     = 0x00;   // 1 Byte
 
             uint8_t ACCUMULATOR   = 0x00;

@@ -14,236 +14,236 @@ CPU::Core6502::Core6502()
     // ??? = illegal opcode
     opcodes[0x00] = {"BRK", &CPU::Core6502::BRK, &CPU::Core6502::MODE_IMM, 7} ;
     opcodes[0x01] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_INX, 6} ;
-    opcodes[0x02] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x03] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x02] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x03] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x04] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 3} ;
     opcodes[0x05] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0x06] = {"ASL", &CPU::Core6502::ASL, &CPU::Core6502::MODE_ZRO, 5} ;
-    opcodes[0x07] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0x07] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0x08] = {"PHP", &CPU::Core6502::PHP, &CPU::Core6502::MODE_IMP, 3} ;
     opcodes[0x09] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0x0a] = {"ASL", &CPU::Core6502::ASL, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x0b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x0b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x0c] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x0d] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0x0e] = {"ASL", &CPU::Core6502::ASL, &CPU::Core6502::MODE_ABS, 6} ;
-    opcodes[0x0f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x0f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x10] = {"BPL", &CPU::Core6502::BPL, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0x11] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_ZRY, 5} ;
-    opcodes[0x12] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x13] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x12] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x13] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x14] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x15] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0x16] = {"ASL", &CPU::Core6502::ASL, &CPU::Core6502::MODE_ZRX, 6} ;
-    opcodes[0x17] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x17] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x18] = {"CLC", &CPU::Core6502::CLC, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x19] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_ABY, 4} ;
     opcodes[0x1a] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x1b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x1b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x1c] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x1d] = {"ORA", &CPU::Core6502::ORA, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0x1e] = {"ASL", &CPU::Core6502::ASL, &CPU::Core6502::MODE_ABX, 7} ;
-    opcodes[0x1f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x1f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x20] = {"JSR", &CPU::Core6502::JSR, &CPU::Core6502::MODE_ABS, 6} ;
     opcodes[0x21] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_INX, 6} ;
-    opcodes[0x22] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x23] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x22] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x23] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x24] = {"BIT", &CPU::Core6502::BIT, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0x25] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0x26] = {"ROL", &CPU::Core6502::ROL, &CPU::Core6502::MODE_ZRO, 5} ;
-    opcodes[0x27] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0x27] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0x28] = {"PLP", &CPU::Core6502::PLP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x29] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0x2a] = {"ROL", &CPU::Core6502::ROL, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x2b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x2b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x2c] = {"BIT", &CPU::Core6502::BIT, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0x2d] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0x2e] = {"ROL", &CPU::Core6502::ROL, &CPU::Core6502::MODE_ABS, 6} ;
-    opcodes[0x2f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x2f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x30] = {"BMI", &CPU::Core6502::BMI, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0x31] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_ZRY, 5} ;
-    opcodes[0x32] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x33] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x32] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x33] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x34] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x35] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0x36] = {"ROL", &CPU::Core6502::ROL, &CPU::Core6502::MODE_ZRX, 6} ;
-    opcodes[0x37] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x37] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x38] = {"SEC", &CPU::Core6502::SEC, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x39] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_ABY, 4} ;
     opcodes[0x3a] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x3b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x3b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x3c] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x3d] = {"AND", &CPU::Core6502::AND, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0x3e] = {"ROL", &CPU::Core6502::ROL, &CPU::Core6502::MODE_ABX, 7} ;
-    opcodes[0x3f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x3f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x40] = {"RTI", &CPU::Core6502::RTI, &CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x41] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_INX, 6} ;
-    opcodes[0x42] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x43] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x42] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x43] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x44] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 3} ;
     opcodes[0x45] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0x46] = {"LSR", &CPU::Core6502::LSR, &CPU::Core6502::MODE_ZRO, 5} ;
-    opcodes[0x47] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0x47] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0x48] = {"PHA", &CPU::Core6502::PHA, &CPU::Core6502::MODE_IMP, 3} ;
     opcodes[0x49] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0x4a] = {"LSR", &CPU::Core6502::LSR, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x4b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x4b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x4c] = {"JMP", &CPU::Core6502::JMP, &CPU::Core6502::MODE_ABS, 3} ;
     opcodes[0x4d] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0x4e] = {"LSR", &CPU::Core6502::LSR, &CPU::Core6502::MODE_ABS, 6} ;
-    opcodes[0x4f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x4f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x50] = {"BVC", &CPU::Core6502::BVC, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0x51] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_ZRY, 5} ;
-    opcodes[0x52] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x53] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x52] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x53] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x54] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x55] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0x56] = {"LSR", &CPU::Core6502::LSR, &CPU::Core6502::MODE_ZRX, 6} ;
-    opcodes[0x57] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x57] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x58] = {"CLI", &CPU::Core6502::CLI, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x59] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_ABY, 4} ;
     opcodes[0x5a] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x5b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x5b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x5c] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x5d] = {"EOR", &CPU::Core6502::EOR, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0x5e] = {"LSR", &CPU::Core6502::LSR, &CPU::Core6502::MODE_ABX, 7} ;
-    opcodes[0x5f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x5f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x60] = {"RTS", &CPU::Core6502::RTS, &CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x61] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_INX, 6} ;
-    opcodes[0x62] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x63] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x62] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x63] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x64] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 3} ;
     opcodes[0x65] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0x66] = {"ROR", &CPU::Core6502::ROR, &CPU::Core6502::MODE_ZRO, 5} ;
-    opcodes[0x67] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0x67] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0x68] = {"PLA", &CPU::Core6502::PLA, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x69] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0x6a] = {"ROR", &CPU::Core6502::ROR, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x6b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x6b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x6c] = {"JMP", &CPU::Core6502::JMP, &CPU::Core6502::MODE_IND, 5} ;
     opcodes[0x6d] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0x6e] = {"ROR", &CPU::Core6502::ROR, &CPU::Core6502::MODE_ABS, 6} ;
-    opcodes[0x6f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x6f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x70] = {"BVS", &CPU::Core6502::BVS, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0x71] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_ZRY, 5} ;
-    opcodes[0x72] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x73] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0x72] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x73] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0x74] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x75] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0x76] = {"ROR", &CPU::Core6502::ROR, &CPU::Core6502::MODE_ZRX, 6} ;
-    opcodes[0x77] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x77] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x78] = {"SEI", &CPU::Core6502::SEI, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x79] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_ABY, 4} ;
     opcodes[0x7a] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x7b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x7b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x7c] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x7d] = {"ADC", &CPU::Core6502::ADC, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0x7e] = {"ROR", &CPU::Core6502::ROR, &CPU::Core6502::MODE_ABX, 7} ;
-    opcodes[0x7f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0x7f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0x80] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x81] = {"STA", &CPU::Core6502::STA, &CPU::Core6502::MODE_INX, 6} ;
     opcodes[0x82] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x83] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x83] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x84] = {"STY", &CPU::Core6502::STY, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0x85] = {"STA", &CPU::Core6502::STA, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0x86] = {"STX", &CPU::Core6502::STX, &CPU::Core6502::MODE_ZRO, 3} ;
-    opcodes[0x87] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 3} ;
+    opcodes[0x87] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 3} ;
     opcodes[0x88] = {"DEY", &CPU::Core6502::DEY, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x89] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x8a] = {"TXA", &CPU::Core6502::TXA, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x8b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x8b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x8c] = {"STY", &CPU::Core6502::STY, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0x8d] = {"STA", &CPU::Core6502::STA, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0x8e] = {"STX", &CPU::Core6502::STX, &CPU::Core6502::MODE_ABS, 4} ;
-    opcodes[0x8f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 4} ;
+    opcodes[0x8f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x90] = {"BCC", &CPU::Core6502::BCC, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0x91] = {"STA", &CPU::Core6502::STA, &CPU::Core6502::MODE_ZRY, 6} ;
-    opcodes[0x92] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x93] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0x92] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0x93] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0x94] = {"STY", &CPU::Core6502::STY, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0x95] = {"STA", &CPU::Core6502::STA, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0x96] = {"STX", &CPU::Core6502::STX, &CPU::Core6502::MODE_ZRY, 4} ;
-    opcodes[0x97] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 4} ;
+    opcodes[0x97] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0x98] = {"TYA", &CPU::Core6502::TYA, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0x99] = {"STA", &CPU::Core6502::STA, &CPU::Core6502::MODE_ABY, 5} ;
     opcodes[0x9a] = {"TXS", &CPU::Core6502::TXS, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0x9b] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0x9b] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0x9c] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0x9d] = {"STA", &CPU::Core6502::STA, &CPU::Core6502::MODE_ABX, 5} ;
-    opcodes[0x9e] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
-    opcodes[0x9f] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0x9e] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0x9f] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0xa0] = {"LDY", &CPU::Core6502::LDY, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0xa1] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_INX, 6} ;
     opcodes[0xa2] = {"LDX", &CPU::Core6502::LDX, &CPU::Core6502::MODE_IMM, 2} ;
-    opcodes[0xa3] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0xa3] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0xa4] = {"LDY", &CPU::Core6502::LDY, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0xa5] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0xa6] = {"LDX", &CPU::Core6502::LDX, &CPU::Core6502::MODE_ZRO, 3} ;
-    opcodes[0xa7] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 3} ;
+    opcodes[0xa7] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 3} ;
     opcodes[0xa8] = {"TAY", &CPU::Core6502::TAY, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xa9] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0xaa] = {"TAX", &CPU::Core6502::TAX, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xab] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0xab] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xac] = {"LDY", &CPU::Core6502::LDY, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0xad] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0xae] = {"LDX", &CPU::Core6502::LDX, &CPU::Core6502::MODE_ABS, 4} ;
-    opcodes[0xaf] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 4} ;
+    opcodes[0xaf] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xb0] = {"BCS", &CPU::Core6502::BCS, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0xb1] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_ZRY, 5} ;
-    opcodes[0xb2] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xb3] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0xb2] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0xb3] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0xb4] = {"LDY", &CPU::Core6502::LDY, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0xb5] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0xb6] = {"LDX", &CPU::Core6502::LDX, &CPU::Core6502::MODE_ZRY, 4} ;
-    opcodes[0xb7] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 4} ;
+    opcodes[0xb7] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xb8] = {"CLV", &CPU::Core6502::CLV, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xb9] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_ABY, 4} ;
     opcodes[0xba] = {"TSX", &CPU::Core6502::TSX, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xbb] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 4} ;
+    opcodes[0xbb] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xbc] = {"LDY", &CPU::Core6502::LDY, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0xbd] = {"LDA", &CPU::Core6502::LDA, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0xbe] = {"LDX", &CPU::Core6502::LDX, &CPU::Core6502::MODE_ABY, 4} ;
-    opcodes[0xbf] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 4} ;
+    opcodes[0xbf] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xc0] = {"CPY", &CPU::Core6502::CPY, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0xc1] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_INX, 6} ;
     opcodes[0xc2] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xc3] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0xc3] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0xc4] = {"CPY", &CPU::Core6502::CPY, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0xc5] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0xc6] = {"DEC", &CPU::Core6502::DEC, &CPU::Core6502::MODE_ZRO, 5} ;
-    opcodes[0xc7] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0xc7] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0xc8] = {"INY", &CPU::Core6502::INY, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xc9] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0xca] = {"DEX", &CPU::Core6502::DEX, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xcb] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0xcb] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xcc] = {"CPY", &CPU::Core6502::CPY, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0xcd] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0xce] = {"DEC", &CPU::Core6502::DEC, &CPU::Core6502::MODE_ABS, 6} ;
-    opcodes[0xcf] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0xcf] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0xd0] = {"BNE", &CPU::Core6502::BNE, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0xd1] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_ZRY, 5} ;
-    opcodes[0xd2] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xd3] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0xd2] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0xd3] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0xd4] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xd5] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0xd6] = {"DEC", &CPU::Core6502::DEC, &CPU::Core6502::MODE_ZRX, 6} ;
-    opcodes[0xd7] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0xd7] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0xd8] = {"CLD", &CPU::Core6502::CLD, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xd9] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_ABY, 4} ;
     opcodes[0xda] = {"NOP", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xdb] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0xdb] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0xdc] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xdd] = {"CMP", &CPU::Core6502::CMP, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0xde] = {"DEC", &CPU::Core6502::DEC, &CPU::Core6502::MODE_ABX, 7} ;
-    opcodes[0xdf] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0xdf] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0xe0] = {"CPX", &CPU::Core6502::CPX, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0xe1] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_INX, 6} ;
     opcodes[0xe2] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xe3] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0xe3] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0xe4] = {"CPX", &CPU::Core6502::CPX, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0xe5] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_ZRO, 3} ;
     opcodes[0xe6] = {"INC", &CPU::Core6502::INC, &CPU::Core6502::MODE_ZRO, 5} ;
-    opcodes[0xe7] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 5} ;
+    opcodes[0xe7] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 5} ;
     opcodes[0xe8] = {"INX", &CPU::Core6502::INX, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xe9] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_IMM, 2} ;
     opcodes[0xea] = {"NOP", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
@@ -251,23 +251,23 @@ CPU::Core6502::Core6502()
     opcodes[0xec] = {"CPX", &CPU::Core6502::CPX, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0xed] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_ABS, 4} ;
     opcodes[0xee] = {"INC", &CPU::Core6502::INC, &CPU::Core6502::MODE_ABS, 6} ;
-    opcodes[0xef] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0xef] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0xf0] = {"BEQ", &CPU::Core6502::BEQ, &CPU::Core6502::MODE_REL, 2} ;
     opcodes[0xf1] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_ZRY, 5} ;
-    opcodes[0xf2] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xf3] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 8} ;
+    opcodes[0xf2] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 2} ;
+    opcodes[0xf3] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 8} ;
     opcodes[0xf4] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xf5] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_ZRX, 4} ;
     opcodes[0xf6] = {"INC", &CPU::Core6502::INC, &CPU::Core6502::MODE_ZRX, 6} ;
-    opcodes[0xf7] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 6} ;
+    opcodes[0xf7] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 6} ;
     opcodes[0xf8] = {"SED", &CPU::Core6502::SED, &CPU::Core6502::MODE_IMP, 2} ;
     opcodes[0xf9] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_ABY, 4} ;
     opcodes[0xfa] = {"NOP", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 2} ;
-    opcodes[0xfb] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7} ;
+    opcodes[0xfb] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7} ;
     opcodes[0xfc] = {"???", &CPU::Core6502::NOP, &CPU::Core6502::MODE_IMP, 4} ;
     opcodes[0xfd] = {"SBC", &CPU::Core6502::SBC, &CPU::Core6502::MODE_ABX, 4} ;
     opcodes[0xfe] = {"INC", &CPU::Core6502::INC, &CPU::Core6502::MODE_ABX, 7} ;
-    opcodes[0xff] = {"???", &CPU::Core6502::NONE, &CPU::Core6502::MODE_IMP, 7};
+    opcodes[0xff] = {"???", &CPU::Core6502::NONE,&CPU::Core6502::MODE_IMP, 7};
 }
 
 CPU::Core6502::~Core6502()
@@ -324,7 +324,7 @@ void CPU::Core6502::DisplayDebugInfos()
 {
     printf("OPCODE %04x | %s [%s]\n", CUR_OPCODE, CUR_INSTR.c_str(), CUR_MODE.c_str());
     if ( CURRENT_ADDRMODE != &MODE_IMP) {
-        printf("=> %s $%04x (%s)\n", CUR_INSTR.c_str(), ARGUMENT, CUR_MODE.c_str());
+        printf("=> %s ARG=$%04x ADDR=$%04x ADREL=$%04x(%s)\n", CUR_INSTR.c_str(), ARGUMENT, BEF_READING, ADDR_REL, CUR_MODE.c_str());
     } else {
         printf("=> %s ---- (%s)\n", CUR_INSTR.c_str(), CUR_MODE.c_str());
     }
@@ -332,19 +332,19 @@ void CPU::Core6502::DisplayDebugInfos()
 
 std::string CPU::Core6502::StringifyAddressMode(uint16_t instr_addr)
 {
-    if ( opcodes[instr_addr].addrmode == &MODE_ACC ){ return "ACC"; } // Accumulator
-    if ( opcodes[instr_addr].addrmode == &MODE_ABS ){ return "ABS"; } // Absolute
-    if ( opcodes[instr_addr].addrmode == &MODE_ABX ){ return "ABX"; } // Absolute X-indexed
-    if ( opcodes[instr_addr].addrmode == &MODE_ABY ){ return "ABY"; } // Absolute Y-indexed
-    if ( opcodes[instr_addr].addrmode == &MODE_IMM ){ return "IMM"; } // Immediate
-    if ( opcodes[instr_addr].addrmode == &MODE_IMP ){ return "IMP"; } // Implied
-    if ( opcodes[instr_addr].addrmode == &MODE_IND ){ return "IND"; } // Indirect
-    if ( opcodes[instr_addr].addrmode == &MODE_INX ){ return "INX"; } // X-Indexed, indirect
-    if ( opcodes[instr_addr].addrmode == &MODE_INY ){ return "INY"; } // indirect, Y-indexed
-    if ( opcodes[instr_addr].addrmode == &MODE_REL ){ return "REL"; } // Relative
-    if ( opcodes[instr_addr].addrmode == &MODE_ZRO ){ return "ZRO"; } // Zeropage
-    if ( opcodes[instr_addr].addrmode == &MODE_ZRX ){ return "ZRX"; } // Zeropage X
-    if ( opcodes[instr_addr].addrmode == &MODE_ZRY ){ return "ZRY"; } // Zeropage Y
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_ACC ){ return "ACC"; } // Accumulator
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_ABS ){ return "ABS"; } // Absolute
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_ABX ){ return "ABX"; } // Absolute X-indexed
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_ABY ){ return "ABY"; } // Absolute Y-indexed
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_IMM ){ return "IMM"; } // Immediate
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_IMP ){ return "IMP"; } // Implied
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_IND ){ return "IND"; } // Indirect
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_INX ){ return "INX"; } // X-Indexed, indirect
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_INY ){ return "INY"; } // indirect, Y-indexed
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_REL ){ return "REL"; } // Relative
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_ZRO ){ return "ZRO"; } // Zeropage
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_ZRX ){ return "ZRX"; } // Zeropage X
+    if ( opcodes[instr_addr].addrmode == &CPU::Core6502::MODE_ZRY ){ return "ZRY"; } // Zeropage Y
     return "---"; // Illegal
 }
 
@@ -417,6 +417,17 @@ bool CPU::Core6502::GetCarryFlag () const // C
 uint8_t CPU::Core6502::GetStatusFlag () const
 {
      return STATUS_FLAG;
+}
+
+uint8_t CPU::Core6502::GetStackPtrvalue() const
+{
+    return STACK_PTR;
+}
+
+
+void CPU::Core6502::DefineProgramCounter(uint16_t pc)
+{
+	DEFAULT_PROG_COUNTER = pc;
 }
 
 
@@ -492,7 +503,7 @@ void CPU::Core6502::Connect(BUS* bus)
 
 void CPU::Core6502::Reset()
 {
-    PROG_COUNTER = 0x00;  // the current addr
+    PROG_COUNTER = DEFAULT_PROG_COUNTER;  // the current addr
     CLOCK        = 0x00;  // the current cycle count
     ARGUMENT     = 0x00;  // value fetched
     ARGUMENT     = 0x00;  // address fetched
@@ -790,13 +801,12 @@ void CPU::Core6502::MODE_REL () // Relative
     // the effective address range
     // for the target instruction must be with -126 to +129 bytes of the branch.
 
-    // [NOTE] : we need to store the result inside ADDR_REL
-    // and not ARGUMENT
+    // [NOTE] : we need to store the result inside ADDR_REL not inside ARGUMENT
     ADDR_REL = read(PROG_COUNTER++);
 
     // out of range
     // ex : -126 => 1
-    if ( ADDR_REL & 0x0080 ) ADDR_REL |= 0xFF00;
+    if ( ADDR_REL & (1 << 7) ) ADDR_REL |= 0xFF00;
 }
 
 /**
@@ -897,10 +907,10 @@ void CPU::Core6502::ADC ()
     uint8_t last_result = sum;
     SetZeroFlag (last_result == 0);  // if the last result is 0 it's true
 
-    SetNegativeFlag(sum & 0x80);     // 8-th digit is set
+    SetNegativeFlag(sum & (1 << 7));     // 8-th digit is set
 
     uint16_t V  = ~(a ^ op) & (a ^ sum);
-    SetOverFlowFlag (V & 0x0080);    // Just checking the MSB
+    SetOverFlowFlag (V & (1 << 7));    // Just checking the MSB
 
     ACCUMULATOR = sum;               // the 8-bits part only matters
 }
@@ -926,7 +936,7 @@ void CPU::Core6502::AND ()
     ACCUMULATOR    &= (uint8_t) ARGUMENT;
 
     SetZeroFlag    ( ACCUMULATOR == 0x00);
-    SetNegativeFlag( ACCUMULATOR &  0x80);
+    SetNegativeFlag( ACCUMULATOR & (1 << 7));
     CLOCK++;
 }
 
@@ -950,7 +960,7 @@ void CPU::Core6502::ASL ()
     // setting the carry if the result will not fit in 8 bits.
 
     uint16_t res = ARGUMENT << 1;
-    SetNegativeFlag( res &  0x80);
+    SetNegativeFlag( res &  (1 << 7));
     SetZeroFlag    ( res & 0x00FF == 0x00);
     SetCarryFlag   ( res & 0xFF00 > 0xFF );
 
@@ -1263,7 +1273,7 @@ CPX  Compare Memory and Index X
 void CPU::Core6502::CPX ()
 {
 	uint16_t res = (uint16_t) X - ARGUMENT;
-    printf("\n%04x - %04x = %04x \n", X, ARGUMENT, res);
+    // printf("\n%04x - %04x = %04x \n", X, ARGUMENT, res);
 	SetCarryFlag   (X >= res);
 	SetZeroFlag    ((res & 0x00FF) == 0x0000);
 	SetNegativeFlag( res & (1 << 7));
@@ -1678,7 +1688,7 @@ void CPU::Core6502::ROL ()
 
 	SetCarryFlag   (res & 0xFF00);
 	SetZeroFlag    ((res & 0x00FF) == 0x0000);
-	SetNegativeFlag(res & 0x0080);
+	SetNegativeFlag(res & (1 << 7));
 
 	if (CURRENT_ADDRMODE == &MODE_IMP) ACCUMULATOR = res;
 	else                               write(BEF_READING, res);
@@ -1706,7 +1716,7 @@ void CPU::Core6502::ROR ()
 
 	SetCarryFlag   (ARGUMENT & 1); //  the old bit 0 becomes the new carry flag value.
 	SetZeroFlag    ((res & 0x00FF) == 0x0000);
-	SetNegativeFlag( res & 0x0080);
+	SetNegativeFlag( res & (1 << 7));
 
 	if (CURRENT_ADDRMODE == &MODE_IMP) ACCUMULATOR = res;
 	else                               write(BEF_READING, res);
@@ -1775,11 +1785,10 @@ void CPU::Core6502::SBC ()
 	uint16_t sum = a + op + c;
 	SetCarryFlag    (sum & 0xFF00);
 	SetZeroFlag     ((sum & 0x00FF) == 0);
-	SetOverFlowFlag ((sum ^ a) & (sum ^ op) & 0x0080);
-	SetNegativeFlag (sum & 0x0080);
+	SetOverFlowFlag ((sum ^ a) & (sum ^ op) & (1 << 7));
+	SetNegativeFlag (sum & (1 << 7));
 
-	ACCUMULATOR = sum & 0x00FF;
-
+	ACCUMULATOR  = sum & 0x00FF;
     CLOCK++;
 }
 
