@@ -36,26 +36,26 @@ namespace CPU {
 
         void DisplayMemory(uint16_t min, uint16_t max) 
         {
-            printf("\n");
-            for (uint16_t i = min, k = 0; i < (min + 16); i++, k++) {
+            printf("\n------------------------------------------------");
+            printf("\n      ");
+            for (uint16_t i = min, k = 0; i < (min + 8); i++, k++) {
                 printf("%04x ", i);
             }
-            printf("\n--------------------------------------------------------------------------------");
-
+            printf("\n------------------------------------------------");
+			
             for (uint16_t i = min, k = 0; i <= max; i++, k++) {
-                if ( k % 16 == 0) {
-                    k = 0;
-                    if ( k != 0 ) printf(" | %02x", (i / 8));
+                if ( k % 8 == 0) {
                     printf("\n");
+                    printf("%04x |", k + min);
                 }
                 printf("  %02x ", read(i));
             }
-            printf("\n--------------------------------------------------------------------------------\n");
+            printf("\n------------------------------------------------\n");
         }
 
         void DisplayStackMemory(uint8_t stack_value) {
             // 0x0100 - 0x01FF
-            printf("\nSTACK MEMORY [idx = %02x] -------------------------------------------------------\n", stack_value);
+            printf("\n--- STACK MEMORY [idx = %02x]\n", stack_value);
             DisplayMemory(0x0100 + stack_value, 0x01FF);
         }
 
@@ -138,7 +138,11 @@ namespace CPU {
              * Connects the CPU with an external component (ex : a RAM)
              */
              void Connect(BUS * bus);
-             void Reset();
+			 
+			 // reproduction of some physical parts of the cpu
+             void Reset                (); // Reset values (prog_counter, registers, cpu status)
+			 void InterruptRequest     (); // interrupt request if allowed (or IRQ)
+			 void NonMaskableInterrupt (); // non maskable interrupt (or NMI)
 
 
 

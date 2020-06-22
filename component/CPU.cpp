@@ -517,9 +517,43 @@ void CPU::Core6502::Reset()
     ACCUMULATOR = 0x00;
     X           = 0x00;
     Y           = 0x00;
-    STACK_PTR   = 0xff;
+    STACK_PTR   = 0xFF;
 
     STATUS_FLAG = (1 << 5);
+}
+
+
+void CPU::Core6502::InterruptRequest () // or IRQ
+{
+	if ( ! GetIRQFlag() ) {
+		SetBreakFlag (0);
+		SetIRQFlag   (1);
+		write(0x0100 + STACK_PTR--, (uint8_t) (PROG_COUNTER >> 8));
+		write(0x0100 + STACK_PTR--, (uint8_t)  PROG_COUNTER);		
+		write(0x0100 + STACK_PTR--, GetStatusFlag() );
+
+		BEF_READING  = 0xFFFE;
+		uint16_t LL  = read(BEF_READING);
+		uint16_t HH  = read(BEF_READING + 1);
+		PROG_COUNTER = (HH << 8) | LL;
+
+		CLOCK += 7;
+	}
+}
+
+void CPU::Core6502::NonMaskableInterrupt () // or NMI
+{
+	SetBreakFlag (0);
+	SetIRQFlag   (1);
+	write(0x0100 + STACK_PTR--, (uint8_t) (PROG_COUNTER >> 8));
+	write(0x0100 + STACK_PTR--, (uint8_t)  PROG_COUNTER);
+	write(0x0100 + STACK_PTR--, GetStatusFlag() );
+
+	BEF_READING  = 0xFFFA;
+	uint16_t LL  = read(BEF_READING);
+	uint16_t HH  = read(BEF_READING + 1);
+	PROG_COUNTER = (HH << 8) | LL;
+	CLOCK += 8;
 }
 
 
