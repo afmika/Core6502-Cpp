@@ -501,6 +501,11 @@ void CPU::Core6502::Connect(BUS* bus)
     this->bus = bus;
 }
 
+/**
+ * CPU Interrupts
+ * reset | IRQ | NMI
+ */
+ 
 void CPU::Core6502::Reset()
 {
     PROG_COUNTER = DEFAULT_PROG_COUNTER;  // the current addr
@@ -526,12 +531,18 @@ void CPU::Core6502::Reset()
 void CPU::Core6502::InterruptRequest () // or IRQ
 {
 	if ( ! GetIRQFlag() ) {
-		SetBreakFlag (0);
-		SetIRQFlag   (1);
+		// put the program counter on to the stack
 		write(0x0100 + STACK_PTR--, (uint8_t) (PROG_COUNTER >> 8));
-		write(0x0100 + STACK_PTR--, (uint8_t)  PROG_COUNTER);		
+		write(0x0100 + STACK_PTR--, (uint8_t)  PROG_COUNTER);
+		// put the status register on to the stack
 		write(0x0100 + STACK_PTR--, GetStatusFlag() );
 
+		// set the interrupt disable flag to prevent further interrupt
+		SetBreakFlag (0);
+		SetIRQFlag   (1);
+		
+		// load the address of the interrupt handling routine from
+		// the vector table into the program counter
 		BEF_READING  = 0xFFFE;
 		uint16_t LL  = read(BEF_READING);
 		uint16_t HH  = read(BEF_READING + 1);
@@ -543,12 +554,20 @@ void CPU::Core6502::InterruptRequest () // or IRQ
 
 void CPU::Core6502::NonMaskableInterrupt () // or NMI
 {
-	SetBreakFlag (0);
-	SetIRQFlag   (1);
+	// same as above
+	
+	// put the program counter on to the stack
 	write(0x0100 + STACK_PTR--, (uint8_t) (PROG_COUNTER >> 8));
 	write(0x0100 + STACK_PTR--, (uint8_t)  PROG_COUNTER);
+	// put the status register on to the stack
 	write(0x0100 + STACK_PTR--, GetStatusFlag() );
-
+	
+	// set the interrupt disable flag to prevent further interrupt
+	SetBreakFlag (0);
+	SetIRQFlag   (1);
+	
+	// load the address of the interrupt handling routine from
+	// the vector table into the program counter
 	BEF_READING  = 0xFFFA;
 	uint16_t LL  = read(BEF_READING);
 	uint16_t HH  = read(BEF_READING + 1);
@@ -1167,13 +1186,17 @@ void CPU::Core6502::BRK ()
     // The processor status is pushed on the stack
 	write(0x0100 + STACK_PTR--, GetStatusFlag() );
 
-    // The IRQ interrupt vector at $FFFE/F is loaded into the PC
-    uint16_t HH = read(0xFFFF) << 8;
-    uint16_t LL = read(0xFFFE);
-	PROG_COUNTER = HH | LL;
-
     // the BRQ flag is set to one
 	SetBreakFlag(1);
+	
+	// IRQs can be triggered by the software by 
+	// use of the BRK (Break) instruction. 
+	// [Note] : When an IRQ occurs the system jumps to the address 
+	// located at $FFFE and $FFFF.
+	SetIRQFlag(1);
+    uint16_t HH  = read(0xFFFF);
+    uint16_t LL  = read(0xFFFE);
+	PROG_COUNTER = (HH  << 8 ) | LL;
 }
 
 /**

@@ -12,7 +12,8 @@ namespace CPU {
         uint16_t r_max;
         std::map<uint16_t, uint8_t> MEMORY;
 
-        BUS (uint16_t r_min, uint16_t r_max, bool initialise) {
+        BUS (uint16_t r_min, uint16_t r_max, bool initialise) 
+		{
             this->r_min = r_min;
             this->r_max = r_max;
             if ( initialise ) {
@@ -38,7 +39,7 @@ namespace CPU {
         {
             printf("\n------------------------------------------------");
             printf("\n      ");
-            for (uint16_t i = min, k = 0; i < (min + 8); i++, k++) {
+            for (uint16_t i = min; i < (min + 8); i++) {
                 printf("%04x ", i);
             }
             printf("\n------------------------------------------------");
@@ -230,7 +231,6 @@ namespace CPU {
 
             /**
              * Handles the addressing mode of all instructions
-             * @todo
              */
 
             void MODE_ACC (); // Accumulator
