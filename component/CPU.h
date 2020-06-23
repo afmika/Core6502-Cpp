@@ -12,7 +12,7 @@ namespace CPU {
         uint16_t r_max;
         std::map<uint16_t, uint8_t> MEMORY;
 
-        BUS (uint16_t r_min, uint16_t r_max, bool initialise) 
+        BUS (uint16_t r_min, uint16_t r_max, bool initialise)
 		{
             this->r_min = r_min;
             this->r_max = r_max;
@@ -23,7 +23,7 @@ namespace CPU {
             }
         }
 
-        void loadProgram(std::string prog) 
+        void loadProgram(std::string prog)
         {
             std::stringstream s;
             s << prog;
@@ -35,7 +35,7 @@ namespace CPU {
             }
         }
 
-        void DisplayMemory(uint16_t min, uint16_t max) 
+        void DisplayMemory(uint16_t min, uint16_t max)
         {
             printf("\n------------------------------------------------");
             printf("\n      ");
@@ -43,7 +43,7 @@ namespace CPU {
                 printf("%04x ", i);
             }
             printf("\n------------------------------------------------");
-			
+
             for (uint16_t i = min, k = 0; i <= max; i++, k++) {
                 if ( k % 8 == 0) {
                     printf("\n");
@@ -113,7 +113,11 @@ namespace CPU {
             uint8_t GetStatusFlag   () const; // = Sum[flag[i] * 2 ^ 7-i ]
             uint8_t GetStackPtrvalue() const;
 
-
+            // useful getters
+            uint8_t GetXRegister    () const;
+            uint8_t GetYRegister    () const;
+            uint8_t GetARegister    () const;
+            uint8_t GetProgCounter  () const;
 
             // Set the default pc
             void DefineProgramCounter(uint16_t pc);
@@ -139,7 +143,7 @@ namespace CPU {
              * Connects the CPU with an external component (ex : a RAM)
              */
              void Connect(BUS * bus);
-			 
+
 			 // reproduction of some physical parts of the cpu
              void Reset                (); // Reset values (prog_counter, registers, cpu status)
 			 void InterruptRequest     (); // interrupt request if allowed (or IRQ)
@@ -158,7 +162,7 @@ namespace CPU {
                     std::string name,
                     void (CPU::Core6502::*run)(),
                     void (CPU::Core6502::*addrmode)(),
-                    uint8_t n_clocks  
+                    uint8_t n_clocks
                 ) : name(name), run(run), addrmode(addrmode), n_clocks(n_clocks) { }
 
                 Instr() : name(), run(), addrmode(), n_clocks() { }
@@ -268,7 +272,7 @@ namespace CPU {
             // our virtual memory
             uint16_t DEFAULT_PROG_COUNTER = 0x0000; // 2 Bytes
             uint16_t PROG_COUNTER         = 0x0000; // 2 Bytes
-			
+
 			uint8_t STACK_PTR     = 0x00;   // 1 Byte
 
             uint8_t ACCUMULATOR   = 0x00;
@@ -287,7 +291,7 @@ namespace CPU {
             // useful for instr that writes on the memory such as STA, STX, ... etc
             // the current token is an absolute address where we need to write instead of reading
             uint16_t BEF_READING = 0x000 ; // stores a temporary address
-            
+
             uint16_t ADDR_REL    = 0x0000; // stores a temporary address for relative instr
             void (CPU::Core6502::*CURRENT_ADDRMODE)() = nullptr;
 
