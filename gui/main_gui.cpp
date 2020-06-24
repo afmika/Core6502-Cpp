@@ -2,22 +2,17 @@
 #include <bits/stdc++.h>
 #include "../component/cpu.h"
 
-const uint32_t fps = 24;
+#include "./classes/Pixel.hpp"
+#include "./classes/Monitor.hpp"
+#include "./classes/Input.hpp"
+
+const uint32_t fps = 16;
 const uint32_t screen_dim = 600;
-const uint32_t tiles_dim  = 25;
-const uint32_t dim_pixel  = screen_dim / tiles_dim;
+const uint32_t n_tiles  = 30;
+const uint32_t dim_pixel  = screen_dim / n_tiles;
 sf::Font font;
 
-// helpers
-uint16_t Convert16BitToRGB (uint8_t color_8bit ) {
-    // personal taste. don't judge me
-    // 8 bits : R|G|B|B : 2 bits each
-    // 8 bits : [RR][GG][BB][BB] : blue is life
-    uint16_t r = (color_8bit & 0b11000000) >> 6,
-             g = (color_8bit & 0b00110000) >> 4,
-             b = (color_8bit & 0b00001111) >> 0;
-    return (r << 12) | (g << 8) | b;
-}
+
 // debug_info
 void debug_info(CPU::Core6502* cpu, sf::RenderWindow* window) {
     uint8_t X      = cpu->GetXRegister     (),
@@ -43,81 +38,21 @@ void debug_info(CPU::Core6502* cpu, sf::RenderWindow* window) {
     window->draw(disp_text);
 }
 
-// this struct will be used inside the monitor
-typedef struct Pixel {
-    uint8_t x;
-    uint8_t y;
-    uint8_t color;
-    Pixel (int x, int y) : x(x), y(y) {
-        color = 0xFF; // white
-    }
-    Pixel() : x(), y() {
-        color = 0xFF; // white
-    }
-
-    void put(sf::RenderWindow& window) {
-        uint16_t rgb = Convert16BitToRGB( color );
-        uint8_t r = (rgb & 0xFF0000) >> 12,
-                g = (rgb & 0x00FF00) >>  8,
-                b = (rgb & 0x0000FF) >>  0;
-        sf::Color color(r, g, b);
-
-        sf::RectangleShape rect;
-        rect.setPosition(sf::Vector2f(tiles_dim * x, tiles_dim * y));
-        rect.setFillColor(color);
-        rect.setSize(sf::Vector2f(dim_pixel, dim_pixel));
-
-        window.draw( rect );
-    }
-} Pixel;
-
-// monitor : can display 16 x 16 tiles
-// 1 pixel => (1byteX, 1byteY, 1 byte of color)
-// this device reads from 0x0600 to 0x0600 + 3 * (n_pixels) % 0xffff
-typedef struct Monitor {
-    sf::RenderWindow* window = nullptr;
-    Monitor (sf::RenderWindow* window) { this->window = window; }
-
-    void readMemory(std::map<uint16_t, uint8_t>* ram) {
-        // position info
-        int n_pixel     = 32; // w x h
-        int infos_count = 3; // 3 bytes (x, y, 8bitcolor)
-        uint16_t rmin = 0x0600;
-        uint16_t rmax = rmin + infos_count * (n_pixel * n_pixel);
-
-        uint16_t ptr = rmin;
-        while ( ptr <= rmax ) {
-            // [Note] possible range for x, y, color = $00 to $ff
-            uint8_t x     = (*ram)[ ptr++ ];
-            uint8_t y     = (*ram)[ ptr++ ];
-            uint8_t color = (*ram)[ ptr++ ];
-            // if ( x != 0 || y != 0 || color != 0) printf("%02x %02x %02x\n", x, y, color);
-            Pixel pixel(x, y);
-            pixel.color = color;
-            pixel.put( *window );
-        }
-    }
-} Monitor;
-
-typedef struct Input {
-
-} Input;
-
 int main() {
     sf::RenderWindow window(sf::VideoMode(screen_dim, screen_dim), "Monitor");
     window.setFramerateLimit( fps );
     std::string font_path = "./font/ibm.ttf";
     if(!font.loadFromFile(font_path)) { printf("Error loading %s\n", font_path.c_str() );}
-    // Pixel pixel = {3, 4};
 
     // monitor
-    Monitor* monitor = new Monitor ( &window );
+    Monitor* monitor = new Monitor ( &window, dim_pixel );
+    // input
+    //Input* input_manager = new Input (0x05FF);
 
     // initializing the cpu
-    CPU::BUS* bus = new CPU::BUS(0x0000, 0xffff, false);
+    CPU::BUS* bus = new CPU::BUS(0x0000, 0xFFFF, false);
     CPU::Core6502* cpu = new CPU::Core6502();
     cpu->Connect( bus );
-    // bus->loadProgram("A9 04 8D 00 06 A9 05 8D 01 06 A9 FF 8D 02 06");
     bus->loadProgram("A9 04 8D 00 06 A9 05 8D 01 06 A9 FF 8D 02 06 AE 02 06 E8 8E 02 06");
 
     // main loop
@@ -128,12 +63,12 @@ int main() {
                 window.close();
         }
         // displaying
-        cpu->Next();
-        monitor->readMemory( &bus->MEMORY );
+        cpu->Next(); // next instruction
+        monitor->readMemory( &bus->MEMORY ); // read(0x0600 to 0x0600 + tot_size)
+        // input_manager->readMemory( &bus->MEMORY );
 
         debug_info(cpu, &window);
 
-        // pixel.put( window );
         window.display();
         window.clear(sf::Color::Black);
     }

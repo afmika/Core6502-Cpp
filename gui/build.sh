@@ -1,7 +1,7 @@
 # We define the includes which are not specific to the project to avoid compilation errors
 # Wall means show warnings
-# g++ -std=c++14 -Wall -s -I include -I "./include" -c classes/*.h
-# g++ -std=c++14 -Wall -s -I include -I "./include" -c classes/*.cpp
+
+g++ -std=c++14 -Wall -s -I include -I "./include" -c classes/*.hpp
 
 # cpu lib
 g++ -std=c++14 -Wall -s -I include -I "./include" -c ../component/*.h
