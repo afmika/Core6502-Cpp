@@ -1,4 +1,9 @@
-#include <bits/stdc++.h>
+#pragma once
+
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <sstream>
 
 /**
  * @author afmika

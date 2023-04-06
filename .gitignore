@@ -1,8 +1,2 @@
 bin
-*.o
-*.h.gch
-*.hpp.gch
-*.dll
-*.exe
-include
-lib
+obj

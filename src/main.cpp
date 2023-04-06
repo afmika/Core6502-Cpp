@@ -1,5 +1,5 @@
-#include <bits/stdc++.h>
-#include "../component/CPU.h"
+#include <iostream>
+#include "CPU.h"
 
 int main(int argc, const char * argv[]) {
     std::string final_prog = "";
